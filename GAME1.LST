@@ -1,0 +1,5530 @@
+Microsoft (R) Macro Assembler Version 6.11		    12/07/18 09:10:16
+game1.asm						     Page 1 - 1
+
+
+				.model small
+				.stack 100h
+ 0000				.data
+				;***********************************************************variables for coordinates***************************************************************
+ 0000 0020			X DW 32; 
+ 0002 0040			Y DW 64; 
+ 0004 00			XO DB ?
+ 0005 00			YO DB ?
+ 0006 0000			X1 DW ?
+ 0008 0000			Y1 DW ?
+ 000A 0000			X2 DW ?
+ 000C 0000			Y2 DW ?
+				;***********************************************************variables for loop purposes***************************************************************
+ 000E 00			VAR1 DB ?
+ 000F 00			var db 0
+ 0010 00			var2 db 0
+ 0011 06			var3 db 6
+ 0012 01			var4 db 1
+ 0013 03			var5 db 3
+ 0014 04			var6 db 4
+ 0015 00			var7 db 0
+ 0016 01			var8 db 1
+ 0017 00			var9 db 0
+ 0018 00			var10 db 0
+ 0019 00			var11 db 0
+ 001A 05			var12 db 5
+ 001B 0A			var13 db 10
+ 001C 00			var14 db 0
+ 001D 00			var15 db 0
+ 001E 05			var16 db 5
+ 001F 0A			var17 db 10
+ 0020 00			var18 db 0
+ 0021 00			var19 db 0
+ 0022 00			var20 db 0
+ 0023 00			var21 db 0
+ 0024 00			var22 db 0
+ 0025 00			var23 db 0
+ 0026 00			var24 db 0
+ 0027 00			var25 db 0
+ 0028 00			var26 db 0
+				;***********************************************************variables for color and indexes***************************************************************
+ 0029 01			count db 1
+ 002A 0000			index dw 0
+ 002C 0000			index1 dw 0
+ 002E 0000			index2 DW 0
+ 0030 0000			index3 DW 0
+ 0032 01			level db 1
+ 0033 00			color db 0
+				;***********************************************************variables for random numbers***************************************************************
+ 0034 000C			num dw 12
+ 0036 E58D			num1 dw 58765
+ 0038 0000			temp1 dw ?
+ 003A 0000			temp2 dw ?
+				;***********************************************************variables for delays***************************************************************
+ 003C 00			long_delay db 0
+ 003D 00			short_delay db 0
+
+				;***********************************************************variables for coordinates and range also moves***************************************************************
+ 003E 0140			T1 DW 320
+ 0040 0141			T2 DW 321
+ 0042 0000			TEMP DW ?
+ 0044 0012			RAND DW 12H
+ 0046 05			RANGE DB 5
+ 0047 06			RANGEFORBLOCKERS DB 6
+ 0048 0000			SCORE DW 0
+ 004A 0005			MOVES DW 5
+ 004C 0000			MOVESPRINT DW 0
+ 004E 0000			DIGITCOUNT DW 0
+ 0050 0000			SCOREPRINT DW 0
+ 0052 0000			DIGITCOUNT1 DW 0
+				;***********************************************************strings used***************************************************************
+ 0054 4C 45 56 45 4C 20		msg1 db "LEVEL 1 ","$"
+       31 20 24
+ 005D 53 43 4F 52 45 20		msg2 db "SCORE : ","$"
+       3A 20 24
+ 0066 4E 41 4D 45 20 3A		msg3 db "NAME : ","$"
+       20 24
+ 006E 52 45 4D 41 49 4E		msg4 db "REMAINING MOVES = ","$"
+       49 4E 47 20 4D 4F
+       56 45 53 20 3D 20
+       24
+ 0081 50 52 45 53 53 20		msg5 db "PRESS ANY KEY TO START ","$"
+       41 4E 59 20 4B 45
+       59 20 54 4F 20 53
+       54 41 52 54 20 24
+ 0099 45 4E 54 45 52 20		msg6 db "ENTER YOUR NAME PLEASE : ","$"
+       59 4F 55 52 20 4E
+       41 4D 45 20 50 4C
+       45 41 53 45 20 3A
+       20 24
+ 00B3 50 4C 41 59 20 57		msg7 db "PLAY WITH YOUR HEART NOT JUST YOUR FINGERS :D ","$"
+       49 54 48 20 59 4F
+       55 52 20 48 45 41
+       52 54 20 4E 4F 54
+       20 4A 55 53 54 20
+       59 4F 55 52 20 46
+       49 4E 47 45 52 53
+       20 3A 44 20 24
+ 00E2 4C 49 46 45 20 49		msg8 db "LIFE IS MORE FUN WHEN YOU PLAY GAMES ^_^ :D ","$"
+       53 20 4D 4F 52 45
+       20 46 55 4E 20 57
+       48 45 4E 20 59 4F
+       55 20 50 4C 41 59
+       20 47 41 4D 45 53
+       20 5E 5F 5E 20 3A
+       44 20 24
+ 010F 4C 45 56 45 4C 20		msg9 db "LEVEL 2 ","$"
+       32 20 24
+ 0118 4A 55 53 54 24		msg10 db "JUST","$"
+ 011D 50 4C 41 59 24		msg11 db "PLAY","$"
+ 0122 5E 5F 5E 24		msg12 db "^_^","$"
+ 0126 48 41 56 45 24		msg13 db "HAVE","$"
+ 012B 46 55 4E 24		msg14 db "FUN","$"
+ 012F 21 21 21 24		msg15 db "!!!","$"
+ 0133 45 4E 4A 4F 59 20		msg16 db "ENJOY :P ","$"
+       3A 50 20 24
+ 013D 54 48 45 20 24		msg17 db "THE ","$"
+ 0142 47 41 4D 45 20 3A		msg18 db "GAME :)","$"
+       29 24
+ 014A 4B 49 44 53 20 50		msg19 db "KIDS PLAY","$"
+       4C 41 59 24
+ 0154 46 49 46 41 24		msg20 db "FIFA","$"
+ 0159 4D 45 4E 20 50 4C		msg21 db "MEN PLAY","$"
+       41 59 24
+ 0162 44 4F 54 41 24		msg22 db "DOTA","$"
+ 0167 4C 45 47 45 4E 44		msg23 db "LEGENDS PLAY","$"
+       53 20 50 4C 41 59
+       24
+ 0174 4E 55 4D 42 45 52		msg24 db "NUMBER","$"
+       24
+ 017B 43 52 55 53 48 20		msg25 db "CRUSH !!","$"
+       21 21 24
+ 0184 4C 45 56 45 4C 20		msg26 db "LEVEL 3 ","$"
+       33 20 24
+ 018D 53 54 41 43 4B 20		msg27 db "STACK :D","$"
+       3A 44 24
+ 0196 4C 45 54 20 54 48		msg28 db "LET THE GOOD TIMES ROLL !! ","$"
+       45 20 47 4F 4F 44
+       20 54 49 4D 45 53
+       20 52 4F 4C 4C 20
+       21 21 20 24
+ 01B2 50 4C 41 59 20 4C		msg29 db "PLAY LIKE","$"
+       49 4B 45 24
+ 01BC 59 4F 55 27 56 45		msg30 db "YOU'VE","$"
+       24
+ 01C3 4E 45 56 45 52 20		msg31 db "NEVER LOST","$"
+       4C 4F 53 54 24
+ 01CE 41 52 45 59 21 21		msg32 db "AREY!!","$"
+       24
+ 01D5 42 48 41 49 21 21		msg33 db "BHAI!!","$" 
+       24
+ 01DC 47 41 4D 45 20 52		msg34 db "GAME RULES !!","$"
+       55 4C 45 53 20 21
+       21 24
+ 01EA 31 2E 57 45 4C 43		msg35 db "1.WELCOME TO NUMBER CRUSH !!!","$"
+       4F 4D 45 20 54 4F
+       20 4E 55 4D 42 45
+       52 20 43 52 55 53
+       48 20 21 21 21 24
+ 0208 32 2E 43 52 55 53		msg36 db "2.CRUSH RANDOM NUMBERS BY MAKING THEIR HORIZONTAL AND VERTICAL COMBINATIONS","$"
+       48 20 52 41 4E 44
+       4F 4D 20 4E 55 4D
+       42 45 52 53 20 42
+       59 20 4D 41 4B 49
+       4E 47 20 54 48 45
+       49 52 20 48 4F 52
+       49 5A 4F 4E 54 41
+       4C 20 41 4E 44 20
+       56 45 52 54 49 43
+       41 4C 20 43 4F 4D
+       42 49 4E 41 54 49
+       4F 4E 53 24
+ 0254 33 2E 59 4F 55 20		msg37 db "3.YOU CAN DO THIS BY SWAPPING THE ADJACENT NUMBERS ","$"
+       43 41 4E 20 44 4F
+       20 54 48 49 53 20
+       42 59 20 53 57 41
+       50 50 49 4E 47 20
+       54 48 45 20 41 44
+       4A 41 43 45 4E 54
+       20 4E 55 4D 42 45
+       52 53 20 24
+ 0288 34 2E 4D 4F 56 45		msg38 db "4.MOVE THE CURSOR TO 1ST NUMBER AND CLICK LEFT BUTTON MOUSE ","$"
+       20 54 48 45 20 43
+       55 52 53 4F 52 20
+       54 4F 20 31 53 54
+       20 4E 55 4D 42 45
+       52 20 41 4E 44 20
+       43 4C 49 43 4B 20
+       4C 45 46 54 20 42
+       55 54 54 4F 4E 20
+       4D 4F 55 53 45 20
+       24
+ 02C5 35 2E 4D 4F 56 45		msg39 db "5.MOVE THE CURSOR TO 2ND NUMBER AND CLICK RIGHT BUTTON MOUSE AND THEY WILL SWAP","$"
+       20 54 48 45 20 43
+       55 52 53 4F 52 20
+       54 4F 20 32 4E 44
+       20 4E 55 4D 42 45
+       52 20 41 4E 44 20
+       43 4C 49 43 4B 20
+       52 49 47 48 54 20
+       42 55 54 54 4F 4E
+       20 4D 4F 55 53 45
+       20 41 4E 44 20 54
+       48 45 59 20 57 49
+       4C 4C 20 53 57 41
+       50 24
+ 0315 36 2E 41 20 43 4F		msg40 db "6.A COMBINATION OF FOUR WILL MAKE A BOMB APPEAR","$" 
+       4D 42 49 4E 41 54
+       49 4F 4E 20 4F 46
+       20 46 4F 55 52 20
+       57 49 4C 4C 20 4D
+       41 4B 45 20 41 20
+       42 4F 4D 42 20 41
+       50 50 45 41 52 24
+ 0345 37 2E 41 4E 44 20		msg41 db "7.AND WHEN BOMB IS SWAPPED WITH A NUMBER ALL THAT NUMBERS ARE CRUSHED","$" 
+       57 48 45 4E 20 42
+       4F 4D 42 20 49 53
+       20 53 57 41 50 50
+       45 44 20 57 49 54
+       48 20 41 20 4E 55
+       4D 42 45 52 20 41
+       4C 4C 20 54 48 41
+       54 20 4E 55 4D 42
+       45 52 53 20 41 52
+       45 20 43 52 55 53
+       48 45 44 24
+ 038B 38 2E 49 46 20 41		msg42 db "8.IF A BOMB IS SWAPPED WITH A BOMB THEN THE WHOLE GRID IS CRUSHED","$"
+       20 42 4F 4D 42 20
+       49 53 20 53 57 41
+       50 50 45 44 20 57
+       49 54 48 20 41 20
+       42 4F 4D 42 20 54
+       48 45 4E 20 54 48
+       45 20 57 48 4F 4C
+       45 20 47 52 49 44
+       20 49 53 20 43 52
+       55 53 48 45 44 24
+ 03CD 39 2E 42 4C 4F 43		msg43 db "9.BLOCKERS CANNOT BE SWAPPED ","$"
+       4B 45 52 53 20 43
+       41 4E 4E 4F 54 20
+       42 45 20 53 57 41
+       50 50 45 44 20 24
+ 03EB 39 2E 54 48 49 53		msg44 db "9.THIS GAME HAS THREE DIFFERENT LEVELS !! ","$"
+       20 47 41 4D 45 20
+       48 41 53 20 54 48
+       52 45 45 20 44 49
+       46 46 45 52 45 4E
+       54 20 4C 45 56 45
+       4C 53 20 21 21 20
+       24
+ 0416 31 30 2E 42 45 53		msg45 db "10.BEST OF LUCK ^_^ ","$"
+       54 20 4F 46 20 4C
+       55 43 4B 20 5E 5F
+       5E 20 24
+ 042B 20 53 4F 4D 45 20		msg46 db " SOME PEOPLE SAY GAMES ROT YOUR BRAIN ","$"
+       50 45 4F 50 4C 45
+       20 53 41 59 20 47
+       41 4D 45 53 20 52
+       4F 54 20 59 4F 55
+       52 20 42 52 41 49
+       4E 20 24
+ 0452 20 42 55 54 20 49		msg47 db " BUT I THINK THEY WORK DIFFERENT MUSCLES THAT ","$"
+       20 54 48 49 4E 4B
+       20 54 48 45 59 20
+       57 4F 52 4B 20 44
+       49 46 46 45 52 45
+       4E 54 20 4D 55 53
+       43 4C 45 53 20 54
+       48 41 54 20 24
+ 0481 20 4D 41 59 42 45		msg48 db " MAYBE YOU DON'T NORMALLY USE ","$"
+       20 59 4F 55 20 44
+       4F 4E 27 54 20 4E
+       4F 52 4D 41 4C 4C
+       59 20 55 53 45 20
+       24
+ 04A0 4C 45 56 45 4C 20		msg49 db "LEVEL 1 LOADING...","$"
+       31 20 4C 4F 41 44
+       49 4E 47 2E 2E 2E
+       24
+ 04B3 20 20 49 20 44 4F		msg50 db "  I DON'T NEED TO  ","$"
+       4E 27 54 20 4E 45
+       45 44 20 54 4F 20
+       20 24
+ 04C7 20 20 47 45 54 20		msg51 db "  GET A LIFE  ","$"
+       41 20 4C 49 46 45
+       20 20 24
+ 04D6 20 49 27 4D 20 41		msg52 db " I'M A GAMER  ","$"
+       20 47 41 4D 45 52
+       20 20 24
+ 04E5 20 20 49 20 48 41		msg53 db "  I HAVE  ","$"
+       56 45 20 20 24
+ 04F0 20 20 41 4C 4F 54		msg54 db "  ALOT OF LIVES ! ","$"
+       20 4F 46 20 4C 49
+       56 45 53 20 21 20
+       24
+ 0503 20 20 4C 45 56 45		msg55 db "  LEVEL 2 LOADING...","$"
+       4C 20 32 20 4C 4F
+       41 44 49 4E 47 2E
+       2E 2E 24
+ 0518 20 20 47 41 4D 45		msg56 db "  GAMES DON'T MAKE YOU VIOLENT,LAG DOES  ","$"
+       53 20 44 4F 4E 27
+       54 20 4D 41 4B 45
+       20 59 4F 55 20 56
+       49 4F 4C 45 4E 54
+       2C 4C 41 47 20 44
+       4F 45 53 20 20 24
+ 0542 20 20 53 41 56 45		msg57 db "  SAVE OUR KIDS,  ","$"
+       20 4F 55 52 20 4B
+       49 44 53 2C 20 20
+       24
+ 0555 20 20 49 4E 53 54		msg58 db "  INSTALL FASTER INTERNET  ","$"
+       41 4C 4C 20 46 41
+       53 54 45 52 20 49
+       4E 54 45 52 4E 45
+       54 20 20 24
+ 0571 20 20 4C 45 56 45		msg59 db "  LEVEL 3 IS LOADING.. ","$"
+       4C 20 33 20 49 53
+       20 4C 4F 41 44 49
+       4E 47 2E 2E 20 24
+ 0589 20 20 54 48 41 4E		msg60 db "  THANK YOU SO MUCH FOR PLAYING ","$"
+       4B 20 59 4F 55 20
+       53 4F 20 4D 55 43
+       48 20 46 4F 52 20
+       50 4C 41 59 49 4E
+       47 20 24
+ 05AA 20 20 47 41 4D 45		msg61 db "  GAMERS NEVER DIE THEY RESPAWN :D ","$"
+       52 53 20 4E 45 56
+       45 52 20 44 49 45
+       20 54 48 45 59 20
+       52 45 53 50 41 57
+       4E 20 3A 44 20 24
+ 05CE 20 20 47 41 4D 45		msg62 db "  GAMERS NEVER QUIT !! ","$"
+       52 53 20 4E 45 56
+       45 52 20 51 55 49
+       54 20 21 21 20 24
+ 05E6 20 20 42 45 20 4C		msg63 db "  BE LIKE GAMERS :)  ","$"
+       49 4B 45 20 47 41
+       4D 45 52 53 20 3A
+       29 20 20 24
+ 05FC 20 20 48 4F 50 45		msg64 db "  HOPE YOU HAD A GREAT TIME :)  ","$"
+       20 59 4F 55 20 48
+       41 44 20 41 20 47
+       52 45 41 54 20 54
+       49 4D 45 20 3A 29
+       20 20 24
+ 061D 20 20 43 4F 4D 45		msg65 db "  COME AGAIN !!  ","$"
+       20 41 47 41 49 4E
+       20 21 21 20 20 24
+ 062F 20 20 47 4F 4F 44		msg66 db "  GOODBYE ! ^_^  ","$"
+       42 59 45 20 21 20
+       5E 5F 5E 20 20 24
+				;***********************************************************arrays used***************************************************************
+ 0641  000A [			username db 10 dup("$")
+        24
+       ]
+ 064B  0064 [			myarray byte 100 dup(1,2,2,2,5)
+        01 02 02 02 05
+       ]
+
+ 0000				.code
+				;***********************************************************MAIN FUNCTION***************************************************************
+
+ 0000				main proc
+ 0000  B8 ---- R		mov ax,@data
+ 0003  8E D8			mov ds,ax
+				;***********************************************************NAME OF GAME DISPLAY SCREEN 1 AND 2***************************************************************
+ 0005				la:
+ 0005  E8 06E2			call new_window
+ 0008  E8 0C7B			call display_start1
+ 000B  E8 0612			call short_delay_function
+ 000E  E8 06D9			call new_window
+ 0011  E8 1190			call display_start2
+ 0014  E8 0609			call short_delay_function
+ 0017  B4 06			mov ah,06
+ 0019  B2 FF			mov dl,0ffh					;SCREENS DIPLAYED UNTIL KEY IS PRESSED
+ 001B  CD 21			int 21h
+ 001D  74 E6			jz la
+				;***********************************************************GAME RULES***************************************************************
+ 001F				waitforrules:
+ 001F  E8 06C8			call new_window
+ 0022  E8 040B			CALL game_rules
+ 0025  E8 05DB			CALL long_delay_function
+ 0028  B4 06			mov ah,06
+ 002A  B2 FF			mov dl,0ffh                  ;RULES DIPLAYED UNTIL KEY IS PRESSED
+ 002C  CD 21			int 21h
+ 002E  74 EF			jz waitforrules
+				;***********************************************************GETTING PLAYER NAME***************************************************************
+ 0030  E8 06B7			Call new_window
+ 0033  E8 168C			call get_name_function
+
+				;***********************************************************LEVEL 1 STARTS***************************************************************
+ 0036  E8 01DB			CALL level1loading
+ 0039  E8 05C7			call long_delay_function
+ 003C  E8 05C4			call long_delay_function
+
+ 003F				lb:
+ 003F  E8 0704			CALL RANDOM           ;generate random
+ 0042  E8 18A3			CALL SHOW_SCREEN1	  ;level 1 screen
+ 0045  E8 05D8			CALL short_delay_function
+ 0048  E8 0737			CALL horizontal_crushing	;crushes the combinations in the start
+ 004B  E8 07CC			CALL vertical_crushing
+ 004E  E8 1897			CALL SHOW_SCREEN1
+				;*****************************************************CONTINUE THE PROCESS UNTIL NO COMBINATION IS POSSIBLE*****************************************
+ 0051				l3:
+ 0051  C6 06 0023 R 00		mov var21,0
+ 0056  E8 05C7			CALL short_delay_function
+ 0059  E8 096A			CALL filltoprow
+ 005C  E8 1889			CALL SHOW_SCREEN1
+ 005F  E8 05BE			CALL short_delay_function
+ 0062  E8 08A5			CALL DROP
+ 0065  E8 1880			CALL SHOW_SCREEN1
+ 0068  E8 05B5			CALL short_delay_function
+ 006B  E8 0714			CALL horizontal_crushing
+ 006E  E8 07A9			CALL vertical_crushing
+ 0071  E8 0C02			CALL CLEAR
+ 0074  E8 1871			CALL SHOW_SCREEN1
+ 0077  E8 0BFC			CALL CLEAR
+ 007A  BE 0000			mov si,0
+ 007D				l4:
+ 007D  80 BC 064B R 2F		cmp myarray[si],'/'
+ 0082  74 CD			je l3
+ 0084  46			inc si
+ 0085  FE 06 0023 R		inc var21
+ 0089  80 3E 0023 R 64		cmp var21,100
+ 008E  74 02			je l1
+ 0090  EB EB			jmp l4
+				;******************************************************AFTER THAT GIVING CONTROL TO THE USER**********************************************************
+
+ 0092				l1:
+ 0092  FF 0E 004A R		DEC MOVES
+ 0096  E8 0BDD			CALL CLEAR
+ 0099  E8 0A8E			CALL MOUSE_CLICK
+ 009C  E8 0B2F			CALL POS
+ 009F  E8 1846			CALL SHOW_SCREEN1
+ 00A2  E8 057B			CALL short_delay_function
+ 00A5  83 3E 004A R 00		CMP MOVES,0
+ 00AA  74 06			JE  skip_crush
+ 00AC  E8 06D3			CALL horizontal_crushing
+ 00AF  E8 0768			CALL vertical_crushing
+ 00B2				skip_crush:
+ 00B2  E8 1833			CALL SHOW_SCREEN1
+ 00B5  E8 0BBE			CALL CLEAR
+ 00B8  E8 178E			CALL sound
+ 00BB  E8 0BB8			CALL CLEAR
+ 00BE  83 3E 004A R 00		CMP MOVES,0
+ 00C3  74 02			JE MEXT
+ 00C5  EB 8A			JMP L3
+				;******************************************************CONTINUE TILL MOVES GET ZERO**********************************************************
+
+				;******************************************************LEVEL 2 STARTS**********************************************************
+
+
+
+ 00C7				MEXT:
+ 00C7  E8 01A6			CALL level2loading
+ 00CA  E8 0536			call long_delay_function
+ 00CD  E8 0533			call long_delay_function
+
+ 00D0  C7 06 0048 R 0000	MOV SCORE,0
+ 00D6  C7 06 004A R 0005	MOV MOVES,5
+ 00DC  E8 0667			CALL RANDOM
+ 00DF  E8 189A			CALL SHOW_SCREEN2
+ 00E2  E8 051E			CALL long_delay_function
+ 00E5  E8 0538			CALL short_delay_function
+ 00E8  E8 1C5B			CALL horizontal_crushing2
+ 00EB  E8 1DCC			CALL vertical_crushing2
+ 00EE  E8 188B			CALL SHOW_SCREEN2
+				;*****************************************************CONTINUE THE PROCESS UNTIL NO COMBINATION IS POSSIBLE*****************************************
+ 00F1				l5:
+ 00F1  C6 06 0028 R 00		mov var26,0
+ 00F6  E8 0527			CALL short_delay_function
+ 00F9  E8 08CA			CALL filltoprow
+ 00FC  E8 187D			CALL SHOW_SCREEN2
+ 00FF  E8 051E			CALL short_delay_function
+ 0102  E8 0805			CALL DROP
+ 0105  E8 1874			CALL SHOW_SCREEN2
+ 0108  E8 0515			CALL short_delay_function
+ 010B  E8 1C38			CALL horizontal_crushing2
+ 010E  E8 1DA9			CALL vertical_crushing2
+ 0111  E8 0B62			CALL CLEAR
+ 0114  E8 1865			CALL SHOW_SCREEN2
+ 0117  E8 0B5C			CALL CLEAR
+ 011A  BE 0000			mov si,0
+ 011D				l7:
+ 011D  80 BC 064B R 2F		cmp myarray[si],'/'
+ 0122  74 CD			je l5
+ 0124  46			inc si
+ 0125  FE 06 0028 R		inc var26
+ 0129  80 3E 0028 R 64		cmp var26,100
+ 012E  74 02			je l6
+ 0130  EB EB			jmp l7
+				;*****************************************************CONTINUE THE PROCESS UNTIL NO COMBINATION IS POSSIBLE*****************************************
+
+				;******************************************************AFTER THAT GIVING CONTROL TO THE USER**********************************************************
+ 0132				l6:
+ 0132  FF 0E 004A R		DEC MOVES
+ 0136  E8 0B3D			CALL CLEAR
+ 0139  E8 09EE			CALL MOUSE_CLICK
+ 013C  E8 0A8F			CALL POS
+ 013F  E8 183A			CALL SHOW_SCREEN2
+ 0142  E8 04DB			CALL short_delay_function
+ 0145  83 3E 004A R 00		CMP MOVES,0
+ 014A  74 06			JE  skip_crush2
+ 014C  E8 1BF7			CALL horizontal_crushing2
+ 014F  E8 1D68			CALL vertical_crushing2
+ 0152				skip_crush2:
+ 0152  E8 1827			CALL SHOW_SCREEN2
+ 0155  E8 0B1E			CALL CLEAR
+ 0158  E8 16EE			CALL sound
+ 015B  E8 0B18			CALL CLEAR
+ 015E  83 3E 004A R 00		CMP MOVES,0
+ 0163  74 02			JE MEXT1
+ 0165  EB 8A			JMP L5
+				;******************************************************CONTINUE TILL MOVES GET ZERO**********************************************************
+
+				;******************************************************LEVEL 3 STARTS**********************************************************
+ 0167				MEXT1:
+ 0167  E8 0186			CALL level3loading
+ 016A  E8 0496			call long_delay_function
+ 016D  E8 0493			call long_delay_function
+ 0170  C7 06 0048 R 0000	MOV SCORE,0
+ 0176  C7 06 004A R 0005	MOV MOVES,5
+ 017C  E8 2178			CALL RANDOM3
+ 017F  E8 180D			CALL SHOW_SCREEN3
+ 0182  E8 047E			CALL long_delay_function
+ 0185  E8 0498			CALL short_delay_function
+ 0188  E8 05F7			CALL horizontal_crushing
+ 018B  E8 068C			CALL vertical_crushing
+ 018E  E8 17FE			CALL SHOW_SCREEN3
+ 0191				l8:
+ 0191  C6 06 0028 R 00		mov var26,0
+ 0196  E8 0487			CALL short_delay_function
+ 0199  E8 082A			CALL filltoprow
+ 019C  E8 17F0			CALL SHOW_SCREEN3
+ 019F  E8 047E			CALL short_delay_function
+ 01A2  E8 0765			CALL DROP
+ 01A5  E8 17E7			CALL SHOW_SCREEN3
+ 01A8  E8 0475			CALL short_delay_function
+ 01AB  E8 05D4			CALL horizontal_crushing
+ 01AE  E8 0669			CALL vertical_crushing
+ 01B1  E8 0AC2			CALL CLEAR
+ 01B4  E8 17D8			CALL SHOW_SCREEN3
+ 01B7  E8 0ABC			CALL CLEAR
+ 01BA  BE 0000			mov si,0
+ 01BD				l10:
+ 01BD  80 BC 064B R 2F		cmp myarray[si],'/'
+ 01C2  74 CD			je l8
+ 01C4  46			inc si
+ 01C5  FE 06 0028 R		inc var26
+ 01C9  80 3E 0028 R 64		cmp var26,100
+ 01CE  74 02			je l9
+ 01D0  EB EB			jmp l10
+				;******************************************************CONTINUE TILL NO COMBINATION*********************************************************
+
+				;******************************************************GIVE USER CONTROL**********************************************************
+ 01D2				l9:
+ 01D2  FF 0E 004A R		DEC MOVES
+ 01D6  E8 0A9D			CALL CLEAR
+ 01D9  E8 094E			CALL MOUSE_CLICK
+ 01DC  E8 09EF			CALL POS
+ 01DF  E8 17AD			CALL SHOW_SCREEN3
+ 01E2  E8 043B			CALL short_delay_function
+ 01E5  83 3E 004A R 00		CMP MOVES,0
+ 01EA  74 06			JE  skip_crush3
+ 01EC  E8 0593			CALL horizontal_crushing
+ 01EF  E8 0628			CALL vertical_crushing
+ 01F2				skip_crush3:
+ 01F2  E8 179A			CALL SHOW_SCREEN3
+ 01F5  E8 0A7E			CALL CLEAR
+ 01F8  E8 164E			CALL sound
+ 01FB  E8 0A78			CALL CLEAR
+ 01FE  83 3E 004A R 00		CMP MOVES,0
+ 0203  74 02			JE MEXT2
+ 0205  EB 8A			JMP L8
+				;******************************************************CONTINUE TILL MOVES GET ZERO**********************************************************
+
+				;******************************************************LEVEL 3 ENDS AND GAME OVERS**********************************************************
+
+ 0207				MEXT2:
+ 0207  E8 0142			call gameoverscreen
+ 020A  E8 03F6			call long_delay_function
+ 020D  E8 03F3			call long_delay_function
+ 0210  B4 4C			mov ah,4ch
+ 0212  CD 21			int 21h
+ 0214				main endp
+
+ 0214				level1loading proc
+ 0214  E8 04D3			CALL new_window
+
+ 0217  B4 06			mov ah,06
+ 0219  B0 00			mov al,0
+ 021B  B5 00			mov ch,0
+ 021D  B1 00			mov cl,0
+ 021F  B6 1D			mov dh,29
+ 0221  B2 4F			mov dl,79
+ 0223  B7 04			mov bh,4
+ 0225  CD 10			int 10h
+
+ 0227  E8 0A4C			CALL CLEAR
+
+ 022A  B4 02			mov ah,02h
+ 022C  B6 0B			mov dh,11
+ 022E  B2 14			mov dl,20
+ 0230  CD 10			int 10h
+ 0232  BA 042B R		mov dx,offset msg46
+ 0235  B4 09			mov ah,09
+ 0237  CD 21			int 21h
+
+ 0239  E8 0A3A			CALL CLEAR
+
+ 023C  B4 02			mov ah,02h
+ 023E  B6 0C			mov dh,12
+ 0240  B2 10			mov dl,16
+ 0242  CD 10			int 10h
+ 0244  BA 0452 R		mov dx,offset msg47
+ 0247  B4 09			mov ah,09
+ 0249  CD 21			int 21h
+
+ 024B  E8 0A28			CALL CLEAR
+
+ 024E  B4 02			mov ah,02h
+ 0250  B6 0D			mov dh,13
+ 0252  B2 17			mov dl,23
+ 0254  CD 10			int 10h
+ 0256  BA 0481 R		mov dx,offset msg48
+ 0259  B4 09			mov ah,09
+ 025B  CD 21			int 21h
+
+ 025D  E8 0A16			CALL CLEAR
+
+ 0260  B4 02			mov ah,02h
+ 0262  B6 16			mov dh,22
+ 0264  B2 1D			mov dl,29
+ 0266  CD 10			int 10h
+ 0268  BA 04A0 R		mov dx,offset msg49
+ 026B  B4 09			mov ah,09
+ 026D  CD 21			int 21h
+
+
+ 026F  C3			ret
+ 0270				level1loading endp
+
+ 0270				level2loading proc
+ 0270  E8 0477			CALL new_window
+
+ 0273  B4 06			mov ah,06
+ 0275  B0 00			mov al,0
+ 0277  B5 00			mov ch,0
+ 0279  B1 00			mov cl,0
+ 027B  B6 1D			mov dh,29
+ 027D  B2 4F			mov dl,79
+ 027F  B7 02			mov bh,2
+ 0281  CD 10			int 10h
+
+ 0283  E8 09F0			CALL CLEAR
+
+ 0286  B4 02			mov ah,02h
+ 0288  B6 08			mov dh,8
+ 028A  B2 1B			mov dl,27
+ 028C  CD 10			int 10h
+ 028E  BA 04B3 R		mov dx,offset msg50
+ 0291  B4 09			mov ah,09
+ 0293  CD 21			int 21h
+
+ 0295  E8 09DE			CALL CLEAR
+
+ 0298  B4 02			mov ah,02h
+ 029A  B6 09			mov dh,9
+ 029C  B2 1D			mov dl,29
+ 029E  CD 10			int 10h
+ 02A0  BA 04C7 R		mov dx,offset msg51
+ 02A3  B4 09			mov ah,09
+ 02A5  CD 21			int 21h
+
+ 02A7  E8 09CC			CALL CLEAR
+
+ 02AA  B4 02			mov ah,02h
+ 02AC  B6 0A			mov dh,10
+ 02AE  B2 1D			mov dl,29
+ 02B0  CD 10			int 10h
+ 02B2  BA 04D6 R		mov dx,offset msg52
+ 02B5  B4 09			mov ah,09
+ 02B7  CD 21			int 21h
+
+ 02B9  E8 09BA			CALL CLEAR
+
+ 02BC  B4 02			mov ah,02h
+ 02BE  B6 0B			mov dh,11
+ 02C0  B2 1F			mov dl,31
+ 02C2  CD 10			int 10h
+ 02C4  BA 04E5 R		mov dx,offset msg53
+ 02C7  B4 09			mov ah,09
+ 02C9  CD 21			int 21h
+
+ 02CB  E8 09A8			CALL CLEAR
+
+ 02CE  B4 02			mov ah,02h
+ 02D0  B6 0C			mov dh,12
+ 02D2  B2 1C			mov dl,28
+ 02D4  CD 10			int 10h
+ 02D6  BA 04F0 R		mov dx,offset msg54
+ 02D9  B4 09			mov ah,09
+ 02DB  CD 21			int 21h
+
+ 02DD  E8 0996			CALL CLEAR
+
+ 02E0  B4 02			mov ah,02h
+ 02E2  B6 16			mov dh,22
+ 02E4  B2 1B			mov dl,27
+ 02E6  CD 10			int 10h
+ 02E8  BA 0503 R		mov dx,offset msg55
+ 02EB  B4 09			mov ah,09
+ 02ED  CD 21			int 21h
+
+ 02EF  C3			ret
+ 02F0				level2loading endp
+
+ 02F0				level3loading proc
+ 02F0  E8 03F7			CALL new_window
+
+ 02F3  B4 06			mov ah,06
+ 02F5  B0 00			mov al,0
+ 02F7  B5 00			mov ch,0
+ 02F9  B1 00			mov cl,0
+ 02FB  B6 1D			mov dh,29
+ 02FD  B2 4F			mov dl,79
+ 02FF  B7 01			mov bh,1
+ 0301  CD 10			int 10h
+
+ 0303  E8 0970			CALL CLEAR
+
+ 0306  B4 02			mov ah,02h
+ 0308  B6 08			mov dh,8
+ 030A  B2 13			mov dl,19
+ 030C  CD 10			int 10h
+ 030E  BA 0518 R		mov dx,offset msg56
+ 0311  B4 09			mov ah,09
+ 0313  CD 21			int 21h
+
+ 0315  E8 095E			CALL CLEAR
+
+ 0318  B4 02			mov ah,02h
+ 031A  B6 09			mov dh,9
+ 031C  B2 1E			mov dl,30
+ 031E  CD 10			int 10h
+ 0320  BA 0542 R		mov dx,offset msg57
+ 0323  B4 09			mov ah,09
+ 0325  CD 21			int 21h
+
+ 0327  E8 094C			CALL CLEAR
+
+ 032A  B4 02			mov ah,02h
+ 032C  B6 0A			mov dh,10
+ 032E  B2 1A			mov dl,26
+ 0330  CD 10			int 10h
+ 0332  BA 0555 R		mov dx,offset msg58
+ 0335  B4 09			mov ah,09
+ 0337  CD 21			int 21h
+
+ 0339  E8 093A			CALL CLEAR
+
+ 033C  B4 02			mov ah,02h
+ 033E  B6 15			mov dh,21
+ 0340  B2 1B			mov dl,27
+ 0342  CD 10			int 10h
+ 0344  BA 0571 R		mov dx,offset msg59
+ 0347  B4 09			mov ah,09
+ 0349  CD 21			int 21h
+
+ 034B  C3			ret
+ 034C				level3loading endp
+
+ 034C				gameoverscreen proc
+ 034C  E8 039B			CALL new_window
+
+ 034F  B4 06			mov ah,06
+ 0351  B0 00			mov al,0
+ 0353  B5 06			mov ch,6
+ 0355  B1 00			mov cl,0
+ 0357  B6 0A			mov dh,10
+ 0359  B2 4F			mov dl,79
+ 035B  B7 03			mov bh,3
+ 035D  CD 10			int 10h
+
+ 035F  B4 06			mov ah,06
+ 0361  B0 00			mov al,0
+ 0363  B5 0F			mov ch,15
+ 0365  B1 00			mov cl,0
+ 0367  B6 16			mov dh,22
+ 0369  B2 4F			mov dl,79
+ 036B  B7 02			mov bh,2
+ 036D  CD 10			int 10h
+
+ 036F  B4 06			mov ah,06
+ 0371  B0 00			mov al,0
+ 0373  B5 17			mov ch,23
+ 0375  B1 00			mov cl,0
+ 0377  B6 1D			mov dh,29
+ 0379  B2 4F			mov dl,79
+ 037B  B7 04			mov bh,4
+ 037D  CD 10			int 10h
+
+ 037F  B4 06			mov ah,06
+ 0381  B0 00			mov al,0
+ 0383  B5 00			mov ch,0
+ 0385  B1 00			mov cl,0
+ 0387  B6 06			mov dh,6
+ 0389  B2 4F			mov dl,79
+ 038B  B7 09			mov bh,9
+ 038D  CD 10			int 10h
+
+ 038F  B4 06			mov ah,06
+ 0391  B0 00			mov al,0
+ 0393  B5 0B			mov ch,11
+ 0395  B1 00			mov cl,0
+ 0397  B6 0E			mov dh,14
+ 0399  B2 4F			mov dl,79
+ 039B  B7 05			mov bh,5
+ 039D  CD 10			int 10h
+
+ 039F  E8 08D4			CALL CLEAR
+
+ 03A2  B4 02			mov ah,02h
+ 03A4  B6 08			mov dh,8
+ 03A6  B2 13			mov dl,19
+ 03A8  CD 10			int 10h
+ 03AA  BA 0589 R		mov dx,offset msg60
+ 03AD  B4 09			mov ah,09
+ 03AF  CD 21			int 21h
+
+ 03B1  E8 08C2			CALL CLEAR
+
+ 03B4  B4 02			mov ah,02h
+ 03B6  B6 08			mov dh,8
+ 03B8  B2 33			mov dl,51
+ 03BA  CD 10			int 10h
+ 03BC  BA 0641 R		mov dx,offset username
+ 03BF  B4 09			mov ah,09
+ 03C1  CD 21			int 21h
+
+ 03C3  E8 08B0			CALL CLEAR
+
+ 03C6  B4 02			mov ah,02h
+ 03C8  B6 10			mov dh,16
+ 03CA  B2 13			mov dl,19
+ 03CC  CD 10			int 10h
+ 03CE  BA 05AA R		mov dx,offset msg61
+ 03D1  B4 09			mov ah,09
+ 03D3  CD 21			int 21h
+
+ 03D5  E8 089E			CALL CLEAR
+
+ 03D8  B4 02			mov ah,02h
+ 03DA  B6 11			mov dh,17
+ 03DC  B2 17			mov dl,23
+ 03DE  CD 10			int 10h
+ 03E0  BA 05CE R		mov dx,offset msg62
+ 03E3  B4 09			mov ah,09
+ 03E5  CD 21			int 21h
+
+ 03E7  E8 088C			CALL CLEAR
+
+ 03EA  B4 02			mov ah,02h
+ 03EC  B6 12			mov dh,18
+ 03EE  B2 17			mov dl,23
+ 03F0  CD 10			int 10h
+ 03F2  BA 05E6 R		mov dx,offset msg63
+ 03F5  B4 09			mov ah,09
+ 03F7  CD 21			int 21h
+
+ 03F9  E8 087A			CALL CLEAR
+
+ 03FC  B4 02			mov ah,02h
+ 03FE  B6 13			mov dh,19
+ 0400  B2 13			mov dl,19
+ 0402  CD 10			int 10h
+ 0404  BA 05FC R		mov dx,offset msg64
+ 0407  B4 09			mov ah,09
+ 0409  CD 21			int 21h
+
+ 040B  E8 0868			CALL CLEAR
+
+ 040E  B4 02			mov ah,02h
+ 0410  B6 14			mov dh,20
+ 0412  B2 19			mov dl,25
+ 0414  CD 10			int 10h
+ 0416  BA 061D R		mov dx,offset msg65
+ 0419  B4 09			mov ah,09
+ 041B  CD 21			int 21h
+
+ 041D  E8 0856			CALL CLEAR
+
+ 0420  B4 02			mov ah,02h
+ 0422  B6 15			mov dh,21
+ 0424  B2 19			mov dl,25
+ 0426  CD 10			int 10h
+ 0428  BA 062F R		mov dx,offset msg66
+ 042B  B4 09			mov ah,09
+ 042D  CD 21			int 21h
+
+
+
+ 042F  C3			ret
+ 0430				gameoverscreen endp
+
+ 0430				game_rules proc
+ 0430  C6 06 0018 R 00		mov var10,0
+ 0435  C6 06 0019 R 00		mov var11,0
+ 043A  C6 06 001A R 02		mov var12,2
+ 043F  C6 06 001B R 0A		mov var13,10
+ 0444  C6 06 0029 R 04		mov count,4
+ 0449  B4 02			mov ah,02h
+ 044B  B6 14			mov dh,20
+ 044D  B2 0F			mov dl,15
+ 044F  CD 10			int 10h
+
+ 0451				lc:
+ 0451  B4 06			mov ah,6
+ 0453  B0 00			mov al,0
+ 0455  8A 2E 0018 R		mov ch,var10
+ 0459  8A 0E 0019 R		mov cl,var11
+ 045D  8A 36 001A R		mov dh,var12
+ 0461  8A 16 001B R		mov dl,var13
+ 0465  8A 3E 0029 R		mov bh,count
+ 0469  CD 10			int 10h
+ 046B  80 06 0019 R 0A		add var11,10
+ 0470  80 06 001B R 0A		add var13,10
+ 0475  FE 06 0029 R		inc count
+ 0479  80 3E 0029 R 0D		cmp count,13
+ 047E  74 02			je ld
+ 0480  EB CF			jmp lc
+
+ 0482				ld:
+ 0482  C6 06 0018 R 1B		mov var10,27
+ 0487  C6 06 0019 R 00		mov var11,0
+ 048C  C6 06 001A R 1D		mov var12,29
+ 0491  C6 06 001B R 0A		mov var13,10
+ 0496  C6 06 0029 R 02		mov count,2
+ 049B				lc1:
+ 049B  B4 06			mov ah,6
+ 049D  B0 00			mov al,0
+ 049F  8A 2E 0018 R		mov ch,var10
+ 04A3  8A 0E 0019 R		mov cl,var11
+ 04A7  8A 36 001A R		mov dh,var12
+ 04AB  8A 16 001B R		mov dl,var13
+ 04AF  8A 3E 0029 R		mov bh,count
+ 04B3  CD 10			int 10h
+ 04B5  80 06 0019 R 0A		add var11,10
+ 04BA  80 06 001B R 0A		add var13,10
+ 04BF  FE 06 0029 R		inc count
+ 04C3  80 3E 0029 R 0B		cmp count,11
+ 04C8  74 02			je lm
+ 04CA  EB CF			jmp lc1
+
+ 04CC				lm:
+ 04CC  E8 07A7			CALL CLEAR 
+
+ 04CF  B4 02			mov ah,02h
+ 04D1  B6 03			mov dh,3
+ 04D3  B2 23			mov dl,35
+ 04D5  CD 10			int 10h
+ 04D7  BA 01DC R		mov dx,offset msg34
+ 04DA  B4 09			mov ah,09
+ 04DC  CD 21			int 21h
+
+ 04DE  E8 0795			CALL CLEAR 
+
+ 04E1  B4 02			mov ah,02h
+ 04E3  B6 05			mov dh,5
+ 04E5  B2 00			mov dl,0
+ 04E7  CD 10			int 10h
+ 04E9  BA 01EA R		mov dx,offset msg35
+ 04EC  B4 09			mov ah,09
+ 04EE  CD 21			int 21h
+
+ 04F0  E8 0783			CALL CLEAR 
+
+ 04F3  B4 02			mov ah,02h
+ 04F5  B6 07			mov dh,7
+ 04F7  B2 00			mov dl,0
+ 04F9  CD 10			int 10h
+ 04FB  BA 0208 R		mov dx,offset msg36
+ 04FE  B4 09			mov ah,09
+ 0500  CD 21			int 21h
+
+ 0502  E8 0771			CALL CLEAR 
+
+ 0505  B4 02			mov ah,02h
+ 0507  B6 09			mov dh,9
+ 0509  B2 00			mov dl,0
+ 050B  CD 10			int 10h
+ 050D  BA 0254 R		mov dx,offset msg37
+ 0510  B4 09			mov ah,09
+ 0512  CD 21			int 21h
+
+ 0514  E8 075F			CALL CLEAR 
+
+ 0517  B4 02			mov ah,02h
+ 0519  B6 0B			mov dh,11
+ 051B  B2 00			mov dl,0
+ 051D  CD 10			int 10h
+ 051F  BA 0288 R		mov dx,offset msg38
+ 0522  B4 09			mov ah,09
+ 0524  CD 21			int 21h
+
+ 0526  E8 074D			CALL CLEAR 
+
+ 0529  B4 02			mov ah,02h
+ 052B  B6 0D			mov dh,13
+ 052D  B2 00			mov dl,0
+ 052F  CD 10			int 10h
+ 0531  BA 02C5 R		mov dx,offset msg39
+ 0534  B4 09			mov ah,09
+ 0536  CD 21			int 21h
+
+ 0538  E8 073B			CALL CLEAR 
+
+ 053B  B4 02			mov ah,02h
+ 053D  B6 0F			mov dh,15
+ 053F  B2 00			mov dl,0
+ 0541  CD 10			int 10h
+ 0543  BA 0315 R		mov dx,offset msg40
+ 0546  B4 09			mov ah,09
+ 0548  CD 21			int 21h
+
+ 054A  E8 0729			CALL CLEAR 
+
+ 054D  B4 02			mov ah,02h
+ 054F  B6 11			mov dh,17
+ 0551  B2 00			mov dl,0
+ 0553  CD 10			int 10h
+ 0555  BA 0345 R		mov dx,offset msg41
+ 0558  B4 09			mov ah,09
+ 055A  CD 21			int 21h
+
+ 055C  E8 0717			CALL CLEAR 
+
+ 055F  B4 02			mov ah,02h
+ 0561  B6 13			mov dh,19
+ 0563  B2 00			mov dl,0
+ 0565  CD 10			int 10h
+ 0567  BA 038B R		mov dx,offset msg42
+ 056A  B4 09			mov ah,09
+ 056C  CD 21			int 21h
+
+ 056E  E8 0705			CALL CLEAR 
+
+ 0571  B4 02			mov ah,02h
+ 0573  B6 15			mov dh,21
+ 0575  B2 00			mov dl,0
+ 0577  CD 10			int 10h
+ 0579  BA 03CD R		mov dx,offset msg43
+ 057C  B4 09			mov ah,09
+ 057E  CD 21			int 21h
+
+ 0580  E8 06F3			CALL CLEAR 
+
+ 0583  B4 02			mov ah,02h
+ 0585  B6 17			mov dh,23
+ 0587  B2 00			mov dl,0
+ 0589  CD 10			int 10h
+ 058B  BA 03EB R		mov dx,offset msg44
+ 058E  B4 09			mov ah,09
+ 0590  CD 21			int 21h
+
+ 0592  E8 06E1			CALL CLEAR 
+
+ 0595  B4 02			mov ah,02h
+ 0597  B6 19			mov dh,25
+ 0599  B2 00			mov dl,0
+ 059B  CD 10			int 10h
+ 059D  BA 0416 R		mov dx,offset msg45
+ 05A0  B4 09			mov ah,09
+ 05A2  CD 21			int 21h
+
+
+ 05A4  B4 06			mov ah,6
+ 05A6  B0 00			mov al,0
+ 05A8  B5 04			mov ch,4
+ 05AA  B1 21			mov cl,33
+ 05AC  B6 04			mov dh,4
+ 05AE  B2 30			mov dl,48
+ 05B0  B7 01			mov bh,1
+ 05B2  CD 10			int 10h
+
+ 05B4  C6 06 0027 R 06		mov var25,6
+ 05B9  C6 06 0026 R 01		mov var24,1
+ 05BE				linesloop:
+
+ 05BE  B4 06			mov ah,6
+ 05C0  B0 00			mov al,0
+ 05C2  8A 2E 0027 R		mov ch,var25
+ 05C6  B1 00			mov cl,0
+ 05C8  8A 36 0027 R		mov dh,var25
+ 05CC  B2 50			mov dl,80
+ 05CE  8A 3E 0026 R		mov bh,var24
+ 05D2  CD 10			int 10h
+ 05D4  80 06 0027 R 02		add var25,2
+ 05D9  FE 06 0026 R		inc var24
+ 05DD  80 3E 0026 R 0C		cmp var24,12
+ 05E2  74 02			je endlinesloop
+ 05E4  EB D8			jmp linesloop
+
+ 05E6				endlinesloop:
+ 05E6  C6 06 0018 R 00		mov var10,0
+ 05EB  C6 06 0019 R 00		mov var11,0
+ 05F0  C6 06 001A R 05		mov var12,5
+ 05F5  C6 06 001B R 0A		mov var13,10
+ 05FA  C6 06 0029 R 01		mov count,1
+ 05FF  E8 0674			CALL CLEAR
+ 0602  C3			ret
+ 0603				game_rules endp
+
+ 0603				long_delay_function proc
+ 0603  C6 06 003C R 00		mov long_delay,0
+ 0608				l8:
+ 0608  B9 0003			mov cx,3
+ 060B  BA FFFF			mov dx,0fffffh
+ 060E  B4 86			mov ah,86h
+ 0610  CD 15			int 15h
+ 0612  FE 06 003C R		inc long_delay
+ 0616  80 3E 003C R 0F		cmp long_delay,15
+ 061B  74 02			je l9
+ 061D  EB E9			jmp l8
+
+ 061F				l9:
+ 061F  C3			ret
+ 0620				long_delay_function endp
+
+ 0620				short_delay_function proc
+ 0620  C6 06 003D R 00		mov short_delay,0
+ 0625				l8:
+ 0625  B9 0003			mov cx,3
+ 0628  BA FFFF			mov dx,0fffffh
+ 062B  B4 86			mov ah,86h
+ 062D  CD 15			int 15h
+ 062F  FE 06 003D R		inc short_delay
+ 0633  80 3E 003D R 02		cmp short_delay,2
+ 0638  74 02			je l9
+ 063A  EB E9			jmp l8
+
+ 063C				l9:
+ 063C  C3			ret
+ 063D				short_delay_function endp
+
+ 063D				welcome_messages proc
+
+ 063D  B4 02			mov ah,02h
+ 063F  B6 00			mov dh,0
+ 0641  B2 00			mov dl,0
+ 0643  CD 10			int 10h
+
+ 0645  B4 09			mov ah,09
+ 0647  BA 0066 R		mov dx,offset msg3
+ 064A  CD 21			int 21h
+
+ 064C  B4 09			mov ah,09
+ 064E  BA 0641 R		mov dx,offset username
+ 0651  CD 21			int 21h
+
+ 0653  B4 02			mov ah,02h
+ 0655  B6 02			mov dh,2
+ 0657  B2 00			mov dl,0
+ 0659  CD 10			int 10h
+
+ 065B  B4 09			mov ah,09
+ 065D  BA 006E R		mov dx,offset msg4
+ 0660  CD 21			int 21h
+
+ 0662  A1 004A R		MOV AX, MOVES
+ 0665  A3 004C R		MOV MOVESPRINT, AX
+ 0668  E8 1209			CALL PRI
+
+
+ 066B  B4 02			mov ah,02h
+ 066D  B6 00			mov dh,0
+ 066F  B2 1E			mov dl,30
+ 0671  CD 10			int 10h
+ 0673  BA 0054 R		mov dx,offset msg1
+ 0676  B4 09			mov ah,09
+ 0678  CD 21			int 21h
+
+
+ 067A  B4 02			mov ah,02h
+ 067C  B6 00			mov dh,0
+ 067E  B2 3C			mov dl,60
+ 0680  CD 10			int 10h
+ 0682  BA 005D R		mov dx,offset msg2
+ 0685  B4 09			mov ah,09
+ 0687  CD 21			int 21h
+
+ 0689  B8 0000			MOV AX, 0
+ 068C  A1 0048 R		mov ax, SCORE
+ 068F  A3 0050 R		mov SCOREPRINT,AX
+ 0692  E8 1219			call PRI1
+
+ 0695  B4 06			mov ah,6
+ 0697  B0 00			mov al,0
+ 0699  B5 01			mov ch,1
+ 069B  B1 00			mov cl,0
+ 069D  B6 01			mov dh,1
+ 069F  B2 0F			mov dl,15
+ 06A1  B7 03			mov bh,3
+ 06A3  CD 10			int 10h
+
+ 06A5  B4 06			mov ah,6
+ 06A7  B0 00			mov al,0
+ 06A9  B5 01			mov ch,1
+ 06AB  B1 1B			mov cl,27
+ 06AD  B6 01			mov dh,1
+ 06AF  B2 26			mov dl,38
+ 06B1  B7 04			mov bh,4
+ 06B3  CD 10			int 10h
+
+ 06B5  B4 06			mov ah,6
+ 06B7  B0 00			mov al,0
+ 06B9  B5 01			mov ch,1
+ 06BB  B1 3A			mov cl,58
+ 06BD  B6 01			mov dh,1
+ 06BF  B2 49			mov dl,73
+ 06C1  B7 02			mov bh,2
+ 06C3  CD 10			int 10h
+
+ 06C5  B4 06			mov ah,6
+ 06C7  B0 00			mov al,0
+ 06C9  B5 03			mov ch,3
+ 06CB  B1 00			mov cl,0
+ 06CD  B6 03			mov dh,3
+ 06CF  B2 14			mov dl,20
+ 06D1  B7 09			mov bh,9
+ 06D3  CD 10			int 10h
+
+ 06D5  B8 0000			mov ax,0
+ 06D8  BB 0000			mov bx,0
+ 06DB  B9 0000			mov cx,0
+ 06DE  BA 0000			mov dx,0
+
+ 06E1  B4 02			mov ah,02h
+ 06E3  B6 1C			mov dh,28
+ 06E5  B2 1C			mov dl,28
+ 06E7  CD 10			int 10h
+ 06E9  C3			ret
+ 06EA				welcome_messages endp
+
+ 06EA				new_window proc
+ 06EA  B4 00			mov ah,0
+ 06EC  B0 12			mov al,12h
+ 06EE  CD 10			int 10h
+ 06F0  C3			ret
+ 06F1				new_window endp
+
+ 06F1				DISPLAY_ARRAY PROC
+ 06F1  BE 0000			MOV SI, 0
+ 06F4  C6 06 0004 R 14		MOV XO, 014H
+ 06F9  C6 06 0005 R 08		MOV YO, 08H
+ 06FE  C7 06 0042 R 000A	MOV TEMP, 10
+ 0704  8B 0E 0042 R		MOV CX, TEMP
+ 0708				L0:	
+ 0708  89 0E 0042 R		MOV TEMP, CX
+ 070C  B9 000A				MOV CX, 10
+ 070F						L1:
+ 070F  8A 16 0004 R					MOV  DL, XO   ;COLUMN
+ 0713  8A 36 0005 R					MOV  DH, YO   ;ROW
+ 0717  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 0719  B4 02						MOV  AH, 02H  ;SETCURSORPOSITION
+ 071B  CD 10						INT  10H	
+ 071D  8A 84 064B R					MOV  AL, MYARRAY[SI]
+ 0721  04 30						ADD AL, 48
+ 0723  8A 9C 064B R					MOV  BL, MYARRAY[SI]
+ 0727  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 0729  B4 0E						MOV  AH, 0EH  ;TELETYPE
+ 072B  CD 10						INT  10H
+ 072D  46						INC SI
+ 072E  80 06 0004 R 04					ADD XO, 04H
+ 0733  E2 DA					LOOP L1
+ 0735  C6 06 0004 R 14				MOV XO, 014H
+ 073A  80 06 0005 R 02				ADD YO, 2
+ 073F  8B 0E 0042 R			MOV CX, TEMP
+ 0743  E2 C3				LOOP L0
+ 0745  C3			RET
+ 0746				DISPLAY_ARRAY ENDP
+
+ 0746				RANDOM PROC
+ 0746  C7 06 0042 R 0000	MOV TEMP, 0
+ 074C  BE 0000			MOV SI, 0
+ 074F				L1:
+ 074F  B4 2C				MOV AH, 2CH
+ 0751  CD 21				INT 21H
+ 0753  A1 0044 R			MOV AX, RAND
+ 0756  BB 0155				MOV BX, 341
+ 0759  F7 E3				MUL BX
+ 075B  BA 0000				MOV DX, 0
+ 075E  BB 0861				MOV BX, 2145
+ 0761  F7 F3				DIV BX
+ 0763  89 16 0044 R			MOV RAND, DX
+ 0767  B4 00				MOV AH, 0
+ 0769  F6 36 0046 R			DIV RANGE
+ 076D  FE C4				INC AH
+ 076F  88 A4 064B R			MOV MYARRAY[SI], AH
+ 0773  46				INC SI
+ 0774  FF 06 0042 R			INC TEMP
+ 0778  83 3E 0042 R 64			CMP TEMP, 100
+ 077D  74 02				JE L2
+ 077F  EB CE				JMP L1
+ 0781				L2:
+ 0781  C3			RET
+ 0782				RANDOM ENDP
+
+ 0782				horizontal_crushing proc
+ 0782  C6 06 001C R 00		mov var14,0
+ 0787  C6 06 001D R 00		mov var15,0
+ 078C  C7 06 002A R 0000	mov index,0
+ 0792				horizontal_outer_iteration:
+ 0792  8B 36 002A R		mov si,index
+ 0796  C6 06 001C R 00		mov var14,0
+ 079B				lcc:
+ 079B  8A 84 064B R		mov al,myarray[si]
+ 079F  46			inc si
+ 07A0  8A 9C 064B R		mov bl,myarray[si]
+ 07A4  38 D8			cmp al,bl
+ 07A6  74 02			je horizontal_check_third
+ 07A8  EB 4A			jmp horizontal_next_step
+
+ 07AA				horizontal_check_third:
+ 07AA  46			inc si
+ 07AB  8A 8C 064B R		mov cl,myarray[si]
+ 07AF  80 BC 064B R 2F		cmp myarray[si],'/'
+ 07B4  74 3E			je horizontal_next_step
+ 07B6  38 CB			cmp bl,cl
+ 07B8  74 03			je horizontal_crush_them
+ 07BA  4E			dec si
+ 07BB  EB 37			jmp horizontal_next_step
+
+ 07BD				horizontal_crush_them:
+ 07BD				check_horizontal_fourth:
+ 07BD  46			inc si
+ 07BE  8A AC 064B R		mov ch,myarray[si]
+ 07C2  80 FD 28			cmp ch,40
+ 07C5  74 0F			je crush_horizontal_blocker
+ 07C7  38 CD			cmp ch,cl
+ 07C9  74 03			je crush_horizontal_four
+ 07CB  4E			dec si
+ 07CC  EB 0E			jmp crush_horizontal_three
+ 07CE				crush_horizontal_four:
+ 07CE  C6 84 064B R 12		mov myarray[si],18
+ 07D3  4E			dec si
+ 07D4  EB 06			jmp crush_horizontal_three
+
+ 07D6				crush_horizontal_blocker:
+ 07D6  C6 84 064B R 2F		mov myarray[si],'/'
+ 07DB  4E			dec si
+
+ 07DC				crush_horizontal_three:
+ 07DC  C6 84 064B R 2F		mov myarray[si],'/'
+ 07E1  4E			dec si
+ 07E2  C6 84 064B R 2F		mov myarray[si],'/'
+ 07E7  4E			dec si
+ 07E8  C6 84 064B R 2F		mov myarray[si],'/'
+ 07ED  46			inc si
+ 07EE  46			inc si
+ 07EF  83 06 0048 R 06		ADD SCORE,6
+
+ 07F4				horizontal_next_step:
+ 07F4  FE 06 001C R		inc var14
+ 07F8  80 3E 001C R 08		cmp var14,8
+ 07FD  74 02			je ldd
+ 07FF  EB 9A			jmp lcc
+
+ 0801				ldd:
+ 0801  C6 06 001C R 00		mov var14,0
+ 0806  83 06 002A R 0A		add index,10
+ 080B  FE 06 001D R		inc var15
+ 080F  80 3E 001D R 0B		cmp var15,11
+ 0814  74 03			je lee
+ 0816  E9 FF79			jmp horizontal_outer_iteration
+ 0819				lee:
+ 0819  C3			ret
+ 081A				horizontal_crushing endp
+
+ 081A				vertical_crushing proc
+ 081A  B8 0000			mov ax,0
+ 081D  BB 0000			mov bx,0
+ 0820  B9 0000			mov cx,0
+ 0823  BA 0000			mov dx,0
+
+ 0826				vertical_outer_iteration:
+ 0826  8B 36 002C R		mov si,index1
+ 082A  C6 06 0019 R 00		mov var11,0
+ 082F				lff:
+ 082F  8A 84 064B R		mov al,myarray[si]
+ 0833  83 06 002C R 0A		add index1,10
+ 0838  8B 36 002C R		mov si,index1
+ 083C  8A 9C 064B R		mov bl,myarray[si]
+ 0840  38 D8			cmp al,bl
+ 0842  74 03			je vertical_check_third
+ 0844  E9 0091			jmp vertical_next_step
+
+ 0847				vertical_check_third:
+ 0847  83 06 002C R 0A		add index1,10
+ 084C  8B 36 002C R		mov si,index1
+ 0850  8A 8C 064B R		mov cl,myarray[si]
+ 0854  80 BC 064B R 2F		cmp myarray[si],'/'
+ 0859  74 7D			je vertical_next_step
+ 085B  38 CB			cmp bl,cl
+ 085D  74 0B			je vertical_crush_them
+ 085F  83 2E 002C R 0A		sub index1,10
+ 0864  8B 36 002C R		mov si,index1
+ 0868  EB 6E			jmp vertical_next_step
+
+ 086A				vertical_crush_them:
+ 086A				check_vertical_fourth:
+ 086A  83 06 002C R 0A		add index1,10
+ 086F  8B 36 002C R		mov si,index1
+ 0873  8A AC 064B R		mov ch,myarray[si]
+ 0877  80 FD 28			cmp ch,40
+ 087A  74 1F			je crush_vertical_blocker
+ 087C  38 CD			cmp ch,cl
+ 087E  74 0B			je crush_vertical_four
+ 0880  83 2E 002C R 0A		sub index1,10
+ 0885  8B 36 002C R		mov si,index1
+ 0889  EB 1E			jmp crush_vertical_three
+
+ 088B				crush_vertical_four:
+ 088B  C6 84 064B R 12		mov myarray[si],18
+ 0890  83 2E 002C R 0A		sub index1,10
+ 0895  8B 36 002C R		mov si,index1
+ 0899  EB 0E			jmp crush_vertical_three
+
+ 089B				crush_vertical_blocker:
+ 089B  C6 84 064B R 2F		mov myarray[si],'/'
+ 08A0  83 2E 002C R 0A		sub index1,10
+ 08A5  8B 36 002C R		mov si,index1
+
+ 08A9				crush_vertical_three:
+ 08A9  C6 84 064B R 2F		mov myarray[si],'/'
+ 08AE  83 2E 002C R 0A		sub index1,10
+ 08B3  8B 36 002C R		mov si,index1
+ 08B7  C6 84 064B R 2F		mov myarray[si],'/'
+ 08BC  83 2E 002C R 0A		sub index1,10
+ 08C1  8B 36 002C R		mov si,index1
+ 08C5  C6 84 064B R 2F		mov myarray[si],'/'
+ 08CA  83 06 002C R 14		add index1,20
+ 08CF  8B 36 002C R		mov si,index1
+ 08D3  83 06 0048 R 06		ADD SCORE,6
+ 08D8				vertical_next_step:
+ 08D8  FE 06 0019 R		inc var11
+ 08DC  80 3E 0019 R 08		cmp var11,8
+ 08E1  74 03			je lgg
+ 08E3  E9 FF49			jmp lff
+
+ 08E6				lgg:
+ 08E6  C6 06 0019 R 00		mov var11,0
+ 08EB  C7 06 002C R 0000	mov index1,0
+ 08F1  FE 06 001A R		inc var12
+ 08F5  A1 002C R		mov ax,index1
+ 08F8  02 06 001A R		add al,var12
+ 08FC  A3 002C R		mov index1,ax
+
+ 08FF  80 3E 001A R 0A		cmp var12,10
+ 0904  74 03			je lhh
+ 0906  E9 FF1D			jmp vertical_outer_iteration
+
+ 0909				lhh:
+ 0909  C3			ret
+ 090A				vertical_crushing endp
+
+ 090A				DROP PROC
+ 090A				start_dropping:
+ 090A  C7 06 002E R 0000	mov index2,0
+ 0910  8B 36 002E R		mov si,index2
+ 0914  C6 06 0020 R 00		mov var18,0
+ 0919  B8 0000			mov ax,0
+ 091C  BB 0000			mov bx,0
+ 091F  B9 0000			mov cx,0
+ 0922  BA 0000			mov dx,0
+ 0925  C6 06 0018 R 00		mov var10,0
+ 092A  C6 06 0019 R 00		mov var11,0
+ 092F  C6 06 001A R 00		mov var12,0
+ 0934  C6 06 001C R 00		mov var14,0
+ 0939  C6 06 001D R 00		mov var15,0
+ 093E  C6 06 001E R 00		mov var16,0
+ 0943  C6 06 001F R 00		mov var17,0
+ 0948  C6 06 0020 R 00		mov var18,0
+ 094D  C7 06 002A R 0000	mov index,0
+ 0953  C7 06 002C R 0000	mov index1,0
+ 0959  C7 06 002E R 0000	mov index2,0
+ 095F  C6 06 0021 R 00		mov var19,0
+ 0964  BE 0000			mov si,0
+
+ 0967				dropping_first:
+ 0967  83 06 002E R 0A		add index2,10
+ 096C  8B 36 002E R		mov si,index2
+
+ 0970  80 BC 064B R 2F		cmp myarray[si],'/'
+ 0975  74 07			je swap_them
+ 0977  83 2E 002E R 0A		sub index2,10
+ 097C  EB 28			jmp next_step
+
+ 097E				swap_them:
+
+ 097E  83 2E 002E R 0A		sub index2,10
+ 0983  8B 36 002E R		mov si,index2
+ 0987  8A 84 064B R		mov al,myarray[si]
+
+ 098B  83 06 002E R 0A		add index2,10
+ 0990  8B 36 002E R		mov si,index2
+ 0994  88 84 064B R		mov myarray[si],al
+
+ 0998  83 2E 002E R 0A		sub index2,10
+ 099D  8B 36 002E R		mov si,index2
+ 09A1  C6 84 064B R 2F		mov myarray[si],'/'
+
+ 09A6				next_step:
+ 09A6  FF 06 002E R		inc index2
+ 09AA  FE 06 0020 R		inc var18
+ 09AE  80 3E 0020 R 5A		cmp var18,90
+ 09B3  74 02			je repeat_dropping
+ 09B5  EB B0			jmp dropping_first
+
+ 09B7				repeat_dropping:
+ 09B7  FE 06 0022 R		inc var20
+ 09BB  80 3E 0022 R 0A		cmp var20,10
+ 09C0  74 03			je end_dropping
+ 09C2  E9 FF45			jmp start_dropping
+ 09C5				end_dropping:
+ 09C5  C3			ret
+ 09C6				DROP ENDP
+
+ 09C6				filltoprow proc
+ 09C6  B8 0000			mov ax,0
+ 09C9  BB 0000			mov bx,0
+ 09CC  B9 0000			mov cx,0
+ 09CF  BA 0000			mov dx,0
+ 09D2  C6 06 0018 R 00		mov var10,0
+ 09D7  C6 06 0019 R 00		mov var11,0
+ 09DC  C6 06 001A R 00		mov var12,0
+ 09E1  C6 06 001C R 00		mov var14,0
+ 09E6  C6 06 001D R 00		mov var15,0
+ 09EB  C6 06 001E R 00		mov var16,0
+ 09F0  C6 06 001F R 00		mov var17,0
+ 09F5  C6 06 0020 R 00		mov var18,0
+ 09FA  C7 06 002C R 0000	mov index1,0
+ 0A00  C7 06 002A R 0000	mov index,0
+ 0A06  C7 06 002E R 0000	mov index2,0
+ 0A0C  C6 06 0021 R 00		mov var19,0
+ 0A11  BE 0000			mov si,0
+
+ 0A14				filltoprow_first:
+
+ 0A14  80 BC 064B R 2F		cmp myarray[si],'/'
+ 0A19  74 02			je create_new
+ 0A1B  EB 24			jmp gotonext
+
+ 0A1D				create_new:
+ 0A1D  B4 2C				MOV AH, 2CH
+ 0A1F  CD 21				INT 21H
+ 0A21  A1 0044 R			MOV AX, RAND
+ 0A24  BB 0155				MOV BX, 341
+ 0A27  F7 E3				MUL BX
+ 0A29  BA 0000				MOV DX, 0
+ 0A2C  BB 0861				MOV BX, 2145
+ 0A2F  F7 F3				DIV BX
+ 0A31  89 16 0044 R			MOV RAND, DX
+ 0A35  B4 00				MOV AH, 0
+ 0A37  F6 36 0046 R			DIV RANGE
+ 0A3B  FE C4				INC AH
+ 0A3D  88 A4 064B R			MOV MYARRAY[SI], AH
+ 0A41				gotonext:
+ 0A41  46			inc si
+ 0A42  FE 06 0021 R		inc var19
+ 0A46  80 3E 0021 R 0A		cmp var19,10
+ 0A4B  74 02			je endfilltop
+ 0A4D  EB C5			jmp filltoprow_first
+ 0A4F				endfilltop:
+ 0A4F  C3			ret
+ 0A50				filltoprow endp
+
+ 0A50				SWAP PROC
+ 0A50  B8 000A			MOV AX , 10
+ 0A53  F7 26 0008 R		MUL Y1
+ 0A57  03 06 0006 R		ADD AX, X1
+ 0A5B  8B F0			MOV SI, AX
+				; ---
+ 0A5D  B8 000A			MOV AX , 10
+ 0A60  F7 26 000C R		MUL Y2
+ 0A64  03 06 000A R		ADD AX, X2
+ 0A68  8B F8			MOV DI, AX
+				; COMPARING ADJACENCY
+ 0A6A  8B C6			MOV AX, SI
+ 0A6C  2B C7			SUB AX, DI
+ 0A6E  83 F8 01			CMP AX, 1
+ 0A71  74 24			JE S
+ 0A73  8B C6			MOV AX, SI
+ 0A75  2B C7			SUB AX, DI
+ 0A77  83 C0 02			ADD AX, 2
+ 0A7A  83 F8 01			CMP AX, 1
+ 0A7D  74 18			JE S
+ 0A7F  8B C6			MOV AX, SI
+ 0A81  2B C7			SUB AX, DI
+ 0A83  83 F8 0A			CMP AX, 10
+ 0A86  74 0F			JE S
+ 0A88  8B C6			MOV AX, SI
+ 0A8A  2B C7			SUB AX, DI
+ 0A8C  83 C0 14			ADD AX, 20
+ 0A8F  83 F8 0A			CMP AX, 10
+ 0A92  74 03			JE S
+ 0A94  E9 0092			JMP R 
+ 0A97				S:; IF ADJACENT THEN
+
+ 0A97  8A A4 064B R		MOV AH, MYARRAY[SI]
+ 0A9B  80 FC 28			CMP AH,40
+ 0A9E  75 03 E9 0086		JE R
+ 0AA3  8A BD 064B R		MOV BH, MYARRAY[DI]
+ 0AA7  80 FF 28			CMP BH,40
+ 0AAA  74 7D			JE R
+ 0AAC  88 BC 064B R		MOV MYARRAY[SI], BH
+ 0AB0  88 A5 064B R		MOV MYARRAY[DI], AH
+
+				;in case of bomb
+ 0AB4  80 FC 12			cmp ah,18
+ 0AB7  74 07			je bomb_crush_case1
+ 0AB9  80 FF 12			cmp bh,18
+ 0ABC  74 29			je bomb_crush_case2
+ 0ABE  EB 69			jmp R 
+
+ 0AC0				bomb_crush_case1:
+ 0AC0  38 FC			cmp ah,bh
+ 0AC2  74 4A			je crush_all
+ 0AC4  C6 06 0024 R 00		mov var22,0
+ 0AC9  BE 0000			mov si,0
+ 0ACC				bomb_crush_loop:
+ 0ACC  38 BC 064B R		cmp myarray[si],bh
+ 0AD0  74 02			je crush_it
+ 0AD2  EB 05			jmp go_next
+
+ 0AD4				crush_it:
+ 0AD4  C6 84 064B R 2F		mov myarray[si],'/'
+
+ 0AD9				go_next:
+ 0AD9  46			inc si
+ 0ADA  FE 06 0024 R		inc var22
+ 0ADE  80 3E 0024 R 64		cmp var22,100
+ 0AE3  74 44			je R
+ 0AE5  EB E5			jmp bomb_crush_loop
+
+
+ 0AE7				bomb_crush_case2:
+ 0AE7  38 FC			cmp ah,bh
+ 0AE9  74 23			je crush_all
+ 0AEB  C6 06 0025 R 00		mov var23,0
+ 0AF0  BE 0000			mov si,0
+ 0AF3				bomb_crush_loop1:
+ 0AF3  38 A4 064B R		cmp myarray[si],ah
+ 0AF7  74 02			je crush_it1
+ 0AF9  EB 05			jmp go_next1
+
+ 0AFB				crush_it1:
+ 0AFB  C6 84 064B R 2F		mov myarray[si],'/'
+
+ 0B00				go_next1:
+ 0B00  46			inc si
+ 0B01  FE 06 0025 R		inc var23
+ 0B05  80 3E 0025 R 64		cmp var23,100
+ 0B0A  74 1D			je R
+ 0B0C  EB E5			jmp bomb_crush_loop1
+
+
+ 0B0E				crush_all:
+ 0B0E  C6 06 0026 R 00		mov var24,0
+ 0B13  BE 0000			mov si,0
+ 0B16				crush_all_loop:
+ 0B16  C6 84 064B R 2F		mov myarray[si],'/'
+ 0B1B  46			inc si
+ 0B1C  FE 06 0026 R		inc var24
+ 0B20  80 3E 0026 R 64		cmp var24,100
+ 0B25  74 02			je R
+ 0B27  EB ED			jmp crush_all_loop
+
+
+ 0B29				R:; ELSE
+ 0B29  C3			RET
+ 0B2A				SWAP ENDP
+
+ 0B2A				MOUSE_CLICK PROC
+ 0B2A  B8 0001			MOV AX, 1
+ 0B2D  CD 33			INT 33H
+ 0B2F				CLICK1:
+
+ 0B2F  BB 0000			MOV BX, 0
+ 0B32  B8 0003			MOV AX, 3
+ 0B35  CD 33			INT 33H
+ 0B37  83 FB 01			CMP BX,1
+ 0B3A  72 F3			JB CLICK1
+
+ 0B3C  C6 06 000E R 20		MOV VAR1, 32
+ 0B41  8B C1			MOV AX, CX
+ 0B43  81 F9 0092		CMP CX, 146
+ 0B47  73 03 E9 0081		JB E
+ 0B4C  81 F9 01D4		CMP CX, 468
+ 0B50  77 7B			JA E
+ 0B52  2D 0092			SUB AX,146
+ 0B55  F6 36 000E R		DIV VAR1
+ 0B59  8A D8			MOV BL, AL
+ 0B5B  89 1E 0006 R		MOV X1, BX
+				; ---
+ 0B5F  C6 06 000E R 20		MOV VAR1, 32
+ 0B64  8B C2			MOV AX, DX
+ 0B66  83 FA 70			CMP DX, 112
+ 0B69  72 62			JB E
+ 0B6B  81 FA 01B2		CMP DX, 434
+ 0B6F  77 5C			JA E
+ 0B71  83 E8 70			SUB AX,112
+ 0B74  F6 36 000E R		DIV VAR1
+ 0B78  8A D8			MOV BL, AL
+ 0B7A  89 1E 0008 R		MOV Y1, BX
+				; ---
+ 0B7E				CLICK2:
+
+ 0B7E  BB 0000			MOV BX, 0
+ 0B81  B8 0003			MOV AX, 3
+ 0B84  CD 33			INT 33H
+ 0B86  83 FB 02			CMP BX,2
+ 0B89  72 F3			JB CLICK2
+
+ 0B8B  C6 06 000E R 20		MOV VAR1, 32
+ 0B90  8B C1			MOV AX, CX
+ 0B92  81 F9 0092		CMP CX, 146
+ 0B96  72 35			JB E
+ 0B98  81 F9 01D4		CMP CX, 468
+ 0B9C  77 2F			JA E
+ 0B9E  2D 0092			SUB AX,146
+ 0BA1  F6 36 000E R		DIV VAR1
+ 0BA5  8A D8			MOV BL, AL
+ 0BA7  89 1E 000A R		MOV X2, BX
+				; ---
+ 0BAB  C6 06 000E R 20		MOV VAR1, 32
+ 0BB0  8B C2			MOV AX, DX
+ 0BB2  83 FA 70			CMP DX, 112
+ 0BB5  72 16			JB E
+ 0BB7  81 FA 01B2		CMP DX, 434
+ 0BBB  77 10			JA E
+ 0BBD  83 E8 70			SUB AX,112
+ 0BC0  F6 36 000E R		DIV VAR1
+ 0BC4  8A D8			MOV BL, AL
+ 0BC6  89 1E 000C R		MOV Y2, BX
+				; ---
+ 0BCA  E8 FE83			CALL SWAP
+ 0BCD				E:
+ 0BCD  C3			RET
+ 0BCE				MOUSE_CLICK ENDP
+
+ 0BCE				POS PROC
+ 0BCE  B4 02			MOV AH, 02
+ 0BD0  B6 18			MOV DH, 24
+ 0BD2  B2 00			MOV DL, 0
+ 0BD4  CD 10			INT 10H
+ 0BD6  C3			RET 
+ 0BD7				POS ENDP
+
+ 0BD7				GRID PROC
+				; VERTICAL LLINES
+ 0BD7  C7 06 0000 R 0092	MOV X, 146
+ 0BDD  C7 06 0002 R 0070	MOV Y, 112
+ 0BE3  C7 06 003E R 0142	MOV T1, 322
+ 0BE9  C7 06 0040 R 000C	MOV T2, 12
+ 0BEF				L2:
+ 0BEF					L1:
+ 0BEF  B4 0C					MOV AH, 0CH
+ 0BF1  B0 0F					MOV AL, 15
+ 0BF3  8B 0E 0000 R				MOV CX, X
+ 0BF7  8B 16 0002 R				MOV DX, Y
+ 0BFB  CD 10					INT 10H
+ 0BFD  FF 06 0002 R			INC Y
+ 0C01  FF 0E 003E R			DEC T1
+ 0C05  8B 0E 003E R			MOV CX, T1
+ 0C09  E2 E4				LOOP L1
+ 0C0B  83 06 0000 R 20		ADD X, 32
+ 0C10  C7 06 0002 R 0070	MOV Y, 112
+ 0C16  C7 06 003E R 0142	MOV T1, 322
+ 0C1C  FF 0E 0040 R		DEC T2
+ 0C20  8B 0E 0040 R		MOV CX, T2
+ 0C24  E2 C9			LOOP L2
+				;_
+				; HORIZONTAL LLINES
+ 0C26  C7 06 0000 R 0092	MOV X, 146
+ 0C2C  C7 06 0002 R 0070	MOV Y, 112
+ 0C32  C7 06 003E R 0142	MOV T1, 322
+ 0C38  C7 06 0040 R 000C	MOV T2, 12
+ 0C3E				L4:
+ 0C3E					L3:
+ 0C3E  B4 0C					MOV AH, 0CH
+ 0C40  B0 0F					MOV AL, 15
+ 0C42  8B 0E 0000 R				MOV CX, X
+ 0C46  8B 16 0002 R				MOV DX, Y
+ 0C4A  CD 10					INT 10H
+ 0C4C  FF 06 0000 R			INC X
+ 0C50  FF 0E 003E R			DEC T1
+ 0C54  8B 0E 003E R			MOV CX, T1
+ 0C58  E2 E4				LOOP L3
+ 0C5A  83 06 0002 R 20		ADD Y, 32
+ 0C5F  C7 06 0000 R 0092	MOV X, 146
+ 0C65  C7 06 003E R 0142	MOV T1, 322
+ 0C6B  FF 0E 0040 R		DEC T2
+ 0C6F  8B 0E 0040 R		MOV CX, T2
+ 0C73  E2 C9			LOOP L4
+
+ 0C75  C3			RET
+ 0C76				GRID ENDP
+
+ 0C76				CLEAR PROC
+ 0C76  B8 0000			MOV AX, 0
+ 0C79  BB 0000			MOV BX, 0
+ 0C7C  B9 0000			MOV CX, 0
+ 0C7F  BA 0000			MOV DX, 0
+ 0C82  BE 0000			MOV SI, 0
+ 0C85  C3			RET
+ 0C86				CLEAR ENDP
+
+ 0C86				display_start1 proc
+ 0C86  B4 02			mov ah,02h
+ 0C88  B7 00			mov bh,0
+ 0C8A  B6 00			mov dh,0
+ 0C8C  B2 00			mov dl,0
+ 0C8E  CD 10			int 10h
+
+ 0C90  B4 06			mov ah,06
+ 0C92  B0 00			mov al,0
+ 0C94  B5 01			mov ch,1
+ 0C96  B1 02			mov cl,2
+ 0C98  B6 08			mov dh,8
+ 0C9A  B2 03			mov dl,3
+ 0C9C  B7 09			mov bh,9
+ 0C9E  CD 10			int 10h
+
+ 0CA0  B4 06			mov ah,06
+ 0CA2  B0 00			mov al,0
+ 0CA4  B5 01			mov ch,1
+ 0CA6  B1 04			mov cl,4
+ 0CA8  B6 01			mov dh,1
+ 0CAA  B2 05			mov dl,5
+ 0CAC  B7 09			mov bh,9
+ 0CAE  CD 10			int 10h
+
+ 0CB0  B4 06			mov ah,06
+ 0CB2  B0 00			mov al,0
+ 0CB4  B5 02			mov ch,2
+ 0CB6  B1 05			mov cl,5
+ 0CB8  B6 02			mov dh,2
+ 0CBA  B2 06			mov dl,6
+ 0CBC  B7 04			mov bh,4
+ 0CBE  CD 10			int 10h
+
+ 0CC0  B4 06			mov ah,06
+ 0CC2  B0 00			mov al,0
+ 0CC4  B5 03			mov ch,3
+ 0CC6  B1 06			mov cl,6
+ 0CC8  B6 03			mov dh,3
+ 0CCA  B2 07			mov dl,7
+ 0CCC  B7 09			mov bh,9
+ 0CCE  CD 10			int 10h
+
+ 0CD0  B4 06			mov ah,06
+ 0CD2  B0 00			mov al,0
+ 0CD4  B5 04			mov ch,4
+ 0CD6  B1 07			mov cl,7
+ 0CD8  B6 04			mov dh,4
+ 0CDA  B2 08			mov dl,8
+ 0CDC  B7 01			mov bh,1
+ 0CDE  CD 10			int 10h
+
+ 0CE0  B4 06			mov ah,06
+ 0CE2  B0 00			mov al,0
+ 0CE4  B5 05			mov ch,5
+ 0CE6  B1 08			mov cl,8
+ 0CE8  B6 05			mov dh,5
+ 0CEA  B2 09			mov dl,9
+ 0CEC  B7 09			mov bh,9
+ 0CEE  CD 10			int 10h
+
+ 0CF0  B4 06			mov ah,06
+ 0CF2  B0 00			mov al,0
+ 0CF4  B5 06			mov ch,6
+ 0CF6  B1 09			mov cl,9
+ 0CF8  B6 06			mov dh,6
+ 0CFA  B2 0A			mov dl,10
+ 0CFC  B7 09			mov bh,9
+ 0CFE  CD 10			int 10h
+
+ 0D00  B4 06			mov ah,06
+ 0D02  B0 00			mov al,0
+ 0D04  B5 07			mov ch,7
+ 0D06  B1 0A			mov cl,10
+ 0D08  B6 07			mov dh,7
+ 0D0A  B2 0B			mov dl,11
+ 0D0C  B7 09			mov bh,9
+ 0D0E  CD 10			int 10h
+
+ 0D10  B4 06			mov ah,06
+ 0D12  B0 00			mov al,0
+ 0D14  B5 08			mov ch,8
+ 0D16  B1 0B			mov cl,11
+ 0D18  B6 08			mov dh,8
+ 0D1A  B2 0C			mov dl,12
+ 0D1C  B7 01			mov bh,1
+ 0D1E  CD 10			int 10h
+
+ 0D20  B4 06			mov ah,06
+ 0D22  B0 00			mov al,0
+ 0D24  B5 01			mov ch,1
+ 0D26  B1 0C			mov cl,12
+ 0D28  B6 08			mov dh,8
+ 0D2A  B2 0D			mov dl,13
+ 0D2C  B7 02			mov bh,2
+ 0D2E  CD 10			int 10h
+
+ 0D30  B4 06			mov ah,06
+ 0D32  B0 00			mov al,0
+ 0D34  B5 01			mov ch,1
+ 0D36  B1 0F			mov cl,15
+ 0D38  B6 08			mov dh,8
+ 0D3A  B2 10			mov dl,16
+ 0D3C  B7 08			mov bh,8
+ 0D3E  CD 10			int 10h
+
+ 0D40  B4 06			mov ah,06
+ 0D42  B0 00			mov al,0
+ 0D44  B5 08			mov ch,8
+ 0D46  B1 11			mov cl,17
+ 0D48  B6 08			mov dh,8
+ 0D4A  B2 17			mov dl,23
+ 0D4C  B7 06			mov bh,6
+ 0D4E  CD 10			int 10h
+
+ 0D50  B4 06			mov ah,06
+ 0D52  B0 00			mov al,0
+ 0D54  B5 01			mov ch,1
+ 0D56  B1 18			mov cl,24
+ 0D58  B6 08			mov dh,8
+ 0D5A  B2 19			mov dl,25
+ 0D5C  B7 09			mov bh,9
+ 0D5E  CD 10			int 10h
+
+ 0D60  B4 06			mov ah,06
+ 0D62  B0 00			mov al,0
+ 0D64  B5 01			mov ch,1
+ 0D66  B1 1B			mov cl,27
+ 0D68  B6 08			mov dh,8
+ 0D6A  B2 1C			mov dl,28
+ 0D6C  B7 03			mov bh,3
+ 0D6E  CD 10			int 10h
+
+ 0D70  B4 06			mov ah,06
+ 0D72  B0 00			mov al,0
+ 0D74  B5 01			mov ch,1
+ 0D76  B1 1D			mov cl,29
+ 0D78  B6 01			mov dh,1
+ 0D7A  B2 1E			mov dl,30
+ 0D7C  B7 09			mov bh,9
+ 0D7E  CD 10			int 10h
+
+ 0D80  B4 06			mov ah,06
+ 0D82  B0 00			mov al,0
+ 0D84  B5 02			mov ch,2
+ 0D86  B1 1E			mov cl,30
+ 0D88  B6 02			mov dh,2
+ 0D8A  B2 1F			mov dl,31
+ 0D8C  B7 08			mov bh,8
+ 0D8E  CD 10			int 10h
+
+ 0D90  B4 06			mov ah,06
+ 0D92  B0 00			mov al,0
+ 0D94  B5 03			mov ch,3
+ 0D96  B1 1F			mov cl,31
+ 0D98  B6 03			mov dh,3
+ 0D9A  B2 20			mov dl,32
+ 0D9C  B7 09			mov bh,9
+ 0D9E  CD 10			int 10h
+
+ 0DA0  B4 06			mov ah,06
+ 0DA2  B0 00			mov al,0
+ 0DA4  B5 04			mov ch,4
+ 0DA6  B1 20			mov cl,32
+ 0DA8  B6 04			mov dh,4
+ 0DAA  B2 21			mov dl,33
+ 0DAC  B7 09			mov bh,9
+ 0DAE  CD 10			int 10h
+
+ 0DB0  B4 06			mov ah,06
+ 0DB2  B0 00			mov al,0
+ 0DB4  B5 03			mov ch,3
+ 0DB6  B1 21			mov cl,33
+ 0DB8  B6 03			mov dh,3
+ 0DBA  B2 22			mov dl,34
+ 0DBC  B7 07			mov bh,7
+ 0DBE  CD 10			int 10h
+
+ 0DC0  B4 06			mov ah,06
+ 0DC2  B0 00			mov al,0
+ 0DC4  B5 02			mov ch,2
+ 0DC6  B1 22			mov cl,34
+ 0DC8  B6 02			mov dh,2
+ 0DCA  B2 23			mov dl,35
+ 0DCC  B7 09			mov bh,9
+ 0DCE  CD 10			int 10h
+
+ 0DD0  B4 06			mov ah,06
+ 0DD2  B0 00			mov al,0
+ 0DD4  B5 01			mov ch,1
+ 0DD6  B1 23			mov cl,35
+ 0DD8  B6 01			mov dh,1
+ 0DDA  B2 24			mov dl,36
+ 0DDC  B7 05			mov bh,5
+ 0DDE  CD 10			int 10h
+
+ 0DE0  B4 06			mov ah,06
+ 0DE2  B0 00			mov al,0
+ 0DE4  B5 01			mov ch,1
+ 0DE6  B1 25			mov cl,37
+ 0DE8  B6 08			mov dh,8
+ 0DEA  B2 26			mov dl,38
+ 0DEC  B7 06			mov bh,6
+ 0DEE  CD 10			int 10h
+
+ 0DF0  B4 06			mov ah,06
+ 0DF2  B0 00			mov al,0
+ 0DF4  B5 01			mov ch,1
+ 0DF6  B1 28			mov cl,40
+ 0DF8  B6 08			mov dh,8
+ 0DFA  B2 29			mov dl,41
+ 0DFC  B7 05			mov bh,5
+ 0DFE  CD 10			int 10h
+
+ 0E00  B4 06			mov ah,06
+ 0E02  B0 00			mov al,0
+ 0E04  B5 01			mov ch,1
+ 0E06  B1 2A			mov cl,42
+ 0E08  B6 01			mov dh,1
+ 0E0A  B2 30			mov dl,48
+ 0E0C  B7 09			mov bh,9
+ 0E0E  CD 10			int 10h
+
+ 0E10  B4 06			mov ah,06
+ 0E12  B0 00			mov al,0
+ 0E14  B5 01			mov ch,1
+ 0E16  B1 31			mov cl,49
+ 0E18  B6 08			mov dh,8
+ 0E1A  B2 32			mov dl,50
+ 0E1C  B7 03			mov bh,3
+ 0E1E  CD 10			int 10h
+
+ 0E20  B4 06			mov ah,06
+ 0E22  B0 00			mov al,0
+ 0E24  B5 08			mov ch,8
+ 0E26  B1 2A			mov cl,42
+ 0E28  B6 08			mov dh,8
+ 0E2A  B2 30			mov dl,48
+ 0E2C  B7 08			mov bh,8
+ 0E2E  CD 10			int 10h
+
+ 0E30  B4 06			mov ah,06
+ 0E32  B0 00			mov al,0
+ 0E34  B5 04			mov ch,4
+ 0E36  B1 2A			mov cl,42
+ 0E38  B6 04			mov dh,4
+ 0E3A  B2 30			mov dl,48
+ 0E3C  B7 01			mov bh,1
+ 0E3E  CD 10			int 10h
+
+ 0E40  B4 06			mov ah,06
+ 0E42  B0 00			mov al,0
+ 0E44  B5 01			mov ch,1
+ 0E46  B1 34			mov cl,52
+ 0E48  B6 08			mov dh,8
+ 0E4A  B2 35			mov dl,53
+ 0E4C  B7 03			mov bh,3
+ 0E4E  CD 10			int 10h
+
+ 0E50  B4 06			mov ah,6
+ 0E52  B0 00			mov al,0
+ 0E54  B5 01			mov ch,1
+ 0E56  B1 36			mov cl,54
+ 0E58  B6 01			mov dh,1
+ 0E5A  B2 3C			mov dl,60
+ 0E5C  B7 08			mov bh,8
+ 0E5E  CD 10			int 10h
+
+ 0E60  B4 06			mov ah,6
+ 0E62  B0 00			mov al,0
+ 0E64  B5 04			mov ch,4
+ 0E66  B1 36			mov cl,54
+ 0E68  B6 04			mov dh,4
+ 0E6A  B2 3C			mov dl,60
+ 0E6C  B7 05			mov bh,5
+ 0E6E  CD 10			int 10h
+
+ 0E70  B4 06			mov ah,6
+ 0E72  B0 00			mov al,0
+ 0E74  B5 08			mov ch,8
+ 0E76  B1 36			mov cl,54
+ 0E78  B6 08			mov dh,8
+ 0E7A  B2 3C			mov dl,60
+ 0E7C  B7 01			mov bh,1
+ 0E7E  CD 10			int 10h
+
+ 0E80  B4 06			mov ah,6
+ 0E82  B0 00			mov al,0
+ 0E84  B5 01			mov ch,1
+ 0E86  B1 3E			mov cl,62
+ 0E88  B6 08			mov dh,8
+ 0E8A  B2 3F			mov dl,63
+ 0E8C  B7 02			mov bh,2
+ 0E8E  CD 10			int 10h
+
+ 0E90  B4 06			mov ah,6
+ 0E92  B0 00			mov al,0
+ 0E94  B5 01			mov ch,1
+ 0E96  B1 40			mov cl,64
+ 0E98  B6 01			mov dh,1
+ 0E9A  B2 46			mov dl,70
+ 0E9C  B7 01			mov bh,1
+ 0E9E  CD 10			int 10h
+
+ 0EA0  B4 06			mov ah,6
+ 0EA2  B0 00			mov al,0
+ 0EA4  B5 01			mov ch,1
+ 0EA6  B1 47			mov cl,71
+ 0EA8  B6 04			mov dh,4
+ 0EAA  B2 48			mov dl,72
+ 0EAC  B7 03			mov bh,3
+ 0EAE  CD 10			int 10h
+
+ 0EB0  B4 06			mov ah,6
+ 0EB2  B0 00			mov al,0
+ 0EB4  B5 04			mov ch,4
+ 0EB6  B1 40			mov cl,64
+ 0EB8  B6 04			mov dh,4
+ 0EBA  B2 46			mov dl,70
+ 0EBC  B7 03			mov bh,3
+ 0EBE  CD 10			int 10h
+
+ 0EC0  B4 06			mov ah,6
+ 0EC2  B0 00			mov al,0
+ 0EC4  B5 05			mov ch,5
+ 0EC6  B1 40			mov cl,64
+ 0EC8  B6 05			mov dh,5
+ 0ECA  B2 41			mov dl,65
+ 0ECC  B7 08			mov bh,8
+ 0ECE  CD 10			int 10h
+
+ 0ED0  B4 06			mov ah,6
+ 0ED2  B0 00			mov al,0
+ 0ED4  B5 06			mov ch,6
+ 0ED6  B1 41			mov cl,65
+ 0ED8  B6 06			mov dh,6
+ 0EDA  B2 42			mov dl,66
+ 0EDC  B7 04			mov bh,4
+ 0EDE  CD 10			int 10h
+
+ 0EE0  B4 06			mov ah,6
+ 0EE2  B0 00			mov al,0
+ 0EE4  B5 07			mov ch,7
+ 0EE6  B1 43			mov cl,67
+ 0EE8  B6 07			mov dh,7
+ 0EEA  B2 44			mov dl,68
+ 0EEC  B7 02			mov bh,2
+ 0EEE  CD 10			int 10h
+
+ 0EF0  B4 06			mov ah,6
+ 0EF2  B0 00			mov al,0
+ 0EF4  B5 08			mov ch,8
+ 0EF6  B1 45			mov cl,69
+ 0EF8  B6 08			mov dh,8
+ 0EFA  B2 46			mov dl,70
+ 0EFC  B7 01			mov bh,1
+ 0EFE  CD 10			int 10h
+				;*************************************************************************
+
+ 0F00  B4 06			mov ah,6
+ 0F02  B0 00			mov al,0
+ 0F04  B5 14			mov ch,20
+ 0F06  B1 0A			mov cl,10
+ 0F08  B6 1C			mov dh,28
+ 0F0A  B2 0B			mov dl,11
+ 0F0C  B7 06			mov bh,6
+ 0F0E  CD 10			int 10h
+
+ 0F10  B4 06			mov ah,6
+ 0F12  B0 00			mov al,0
+ 0F14  B5 14			mov ch,20
+ 0F16  B1 0C			mov cl,12
+ 0F18  B6 14			mov dh,20
+ 0F1A  B2 13			mov dl,19
+ 0F1C  B7 02			mov bh,2
+ 0F1E  CD 10			int 10h
+
+ 0F20  B4 06			mov ah,6
+ 0F22  B0 00			mov al,0
+ 0F24  B5 1C			mov ch,28
+ 0F26  B1 0C			mov cl,12
+ 0F28  B6 1C			mov dh,28
+ 0F2A  B2 13			mov dl,19
+ 0F2C  B7 06			mov bh,6
+ 0F2E  CD 10			int 10h
+
+ 0F30  B4 06			mov ah,06
+ 0F32  B0 00			mov al,0
+ 0F34  B5 14			mov ch,20
+ 0F36  B1 15			mov cl,21
+ 0F38  B6 1C			mov dh,28
+ 0F3A  B2 16			mov dl,22
+ 0F3C  B7 06			mov bh,6
+ 0F3E  CD 10			int 10h
+
+ 0F40  B4 06			mov ah,6
+ 0F42  B0 00			mov al,0
+ 0F44  B5 14			mov ch,20
+ 0F46  B1 17			mov cl,23
+ 0F48  B6 14			mov dh,20
+ 0F4A  B2 1E			mov dl,30
+ 0F4C  B7 04			mov bh,4
+ 0F4E  CD 10			int 10h
+
+ 0F50  B4 06			mov ah,6
+ 0F52  B0 00			mov al,0
+ 0F54  B5 14			mov ch,20
+ 0F56  B1 1E			mov cl,30
+ 0F58  B6 18			mov dh,24
+ 0F5A  B2 1F			mov dl,31
+ 0F5C  B7 09			mov bh,9
+ 0F5E  CD 10			int 10h
+
+ 0F60  B4 06			mov ah,6
+ 0F62  B0 00			mov al,0
+ 0F64  B5 18			mov ch,24
+ 0F66  B1 17			mov cl,23
+ 0F68  B6 18			mov dh,24
+ 0F6A  B2 1D			mov dl,29
+ 0F6C  B7 01			mov bh,1
+ 0F6E  CD 10			int 10h
+
+ 0F70  B4 06			mov ah,6
+ 0F72  B0 00			mov al,0
+ 0F74  B5 19			mov ch,25
+ 0F76  B1 17			mov cl,23
+ 0F78  B6 19			mov dh,25
+ 0F7A  B2 18			mov dl,24
+ 0F7C  B7 01			mov bh,1
+ 0F7E  CD 10			int 10h
+
+ 0F80  B4 06			mov ah,6
+ 0F82  B0 00			mov al,0
+ 0F84  B5 1A			mov ch,26
+ 0F86  B1 18			mov cl,24
+ 0F88  B6 1A			mov dh,26
+ 0F8A  B2 19			mov dl,25
+ 0F8C  B7 07			mov bh,7
+ 0F8E  CD 10			int 10h
+
+ 0F90  B4 06			mov ah,6
+ 0F92  B0 00			mov al,0
+ 0F94  B5 1B			mov ch,27
+ 0F96  B1 1A			mov cl,26
+ 0F98  B6 1B			mov dh,27
+ 0F9A  B2 1B			mov dl,27
+ 0F9C  B7 04			mov bh,4
+ 0F9E  CD 10			int 10h
+
+ 0FA0  B4 06			mov ah,6
+ 0FA2  B0 00			mov al,0
+ 0FA4  B5 1C			mov ch,28
+ 0FA6  B1 1C			mov cl,28
+ 0FA8  B6 1C			mov dh,28
+ 0FAA  B2 1D			mov dl,29
+ 0FAC  B7 04			mov bh,4
+ 0FAE  CD 10			int 10h
+
+ 0FB0  B4 06			mov ah,6
+ 0FB2  B0 00			mov al,0
+ 0FB4  B5 14			mov ch,20
+ 0FB6  B1 21			mov cl,33
+ 0FB8  B6 1C			mov dh,28
+ 0FBA  B2 22			mov dl,34
+ 0FBC  B7 06			mov bh,6
+ 0FBE  CD 10			int 10h
+
+ 0FC0  B4 06			mov ah,6
+ 0FC2  B0 00			mov al,0
+ 0FC4  B5 1C			mov ch,28
+ 0FC6  B1 23			mov cl,35
+ 0FC8  B6 1C			mov dh,28
+ 0FCA  B2 2A			mov dl,42
+ 0FCC  B7 06			mov bh,6
+ 0FCE  CD 10			int 10h
+
+ 0FD0  B4 06			mov ah,6
+ 0FD2  B0 00			mov al,0
+ 0FD4  B5 14			mov ch,20
+ 0FD6  B1 2B			mov cl,43
+ 0FD8  B6 1C			mov dh,28
+ 0FDA  B2 2C			mov dl,44
+ 0FDC  B7 02			mov bh,2
+ 0FDE  CD 10			int 10h
+
+ 0FE0  B4 06			mov ah,6
+ 0FE2  B0 00			mov al,0
+ 0FE4  B5 14			mov ch,20
+ 0FE6  B1 2E			mov cl,46
+ 0FE8  B6 18			mov dh,24
+ 0FEA  B2 2F			mov dl,47
+ 0FEC  B7 03			mov bh,3
+ 0FEE  CD 10			int 10h
+
+ 0FF0  B4 06			mov ah,6
+ 0FF2  B0 00			mov al,0
+ 0FF4  B5 18			mov ch,24
+ 0FF6  B1 30			mov cl,48
+ 0FF8  B6 18			mov dh,24
+ 0FFA  B2 36			mov dl,54
+ 0FFC  B7 07			mov bh,7
+ 0FFE  CD 10			int 10h
+
+ 1000  B4 06			mov ah,6
+ 1002  B0 00			mov al,0
+ 1004  B5 18			mov ch,24
+ 1006  B1 37			mov cl,55
+ 1008  B6 1C			mov dh,28
+ 100A  B2 38			mov dl,56
+ 100C  B7 08			mov bh,8
+ 100E  CD 10			int 10h
+
+ 1010  B4 06			mov ah,6
+ 1012  B0 00			mov al,0
+ 1014  B5 1C			mov ch,28
+ 1016  B1 2E			mov cl,46
+ 1018  B6 1C			mov dh,28
+ 101A  B2 38			mov dl,56
+ 101C  B7 05			mov bh,5
+ 101E  CD 10			int 10h
+
+ 1020  B4 06			mov ah,6
+ 1022  B0 00			mov al,0
+ 1024  B5 14			mov ch,20
+ 1026  B1 30			mov cl,48
+ 1028  B6 14			mov dh,20
+ 102A  B2 38			mov dl,56
+ 102C  B7 01			mov bh,1
+ 102E  CD 10			int 10h
+
+ 1030  B4 06			mov ah,6
+ 1032  B0 00			mov al,0
+ 1034  B5 14			mov ch,20
+ 1036  B1 3A			mov cl,58
+ 1038  B6 1C			mov dh,28
+ 103A  B2 3B			mov dl,59
+ 103C  B7 07			mov bh,7
+ 103E  CD 10			int 10h
+
+ 1040  B4 06			mov ah,6
+ 1042  B0 00			mov al,0
+ 1044  B5 14			mov ch,20
+ 1046  B1 45			mov cl,69
+ 1048  B6 1C			mov dh,28
+ 104A  B2 46			mov dl,70
+ 104C  B7 03			mov bh,3
+ 104E  CD 10			int 10h
+
+ 1050  B4 06			mov ah,6
+ 1052  B0 00			mov al,0
+ 1054  B5 18			mov ch,24
+ 1056  B1 3C			mov cl,60
+ 1058  B6 18			mov dh,24
+ 105A  B2 44			mov dl,68
+ 105C  B7 09			mov bh,9
+ 105E  CD 10			int 10h
+				;************************************************************************
+				;**************************BOXES****************************************
+				;**************************BOX1**********************************************
+ 1060  B4 06			mov ah,6
+ 1062  B0 00			mov al,0
+ 1064  B5 0A			mov ch,10
+ 1066  B1 04			mov cl,4
+ 1068  B6 12			mov dh,18
+ 106A  B2 10			mov dl,16
+ 106C  B7 02			mov bh,2
+ 106E  CD 10			int 10h
+				;*************************NUMBER7*********************************************
+ 1070  B4 06			mov ah,6
+ 1072  B0 00			mov al,0
+ 1074  B5 0B			mov ch,11
+ 1076  B1 06			mov cl,6
+ 1078  B6 0B			mov dh,11
+ 107A  B2 0E			mov dl,14
+ 107C  B7 00			mov bh,0
+ 107E  CD 10			int 10h
+
+ 1080  B4 06			mov ah,6
+ 1082  B0 00			mov al,0
+ 1084  B5 0B			mov ch,11
+ 1086  B1 0E			mov cl,14
+ 1088  B6 11			mov dh,17
+ 108A  B2 0F			mov dl,15
+ 108C  B7 00			mov bh,0
+ 108E  CD 10			int 10h
+				;******************************BOX2*****************************************
+ 1090  B4 06			mov ah,6
+ 1092  B0 00			mov al,0
+ 1094  B5 0A			mov ch,10
+ 1096  B1 12			mov cl,18
+ 1098  B6 12			mov dh,18
+ 109A  B2 1E			mov dl,30
+ 109C  B7 03			mov bh,3
+ 109E  CD 10			int 10h
+				;*********************NUMBER1******************************************
+ 10A0  B4 06			mov ah,6
+ 10A2  B0 00			mov al,0
+ 10A4  B5 0B			mov ch,11
+ 10A6  B1 17			mov cl,23
+ 10A8  B6 11			mov dh,17
+ 10AA  B2 18			mov dl,24
+ 10AC  B7 00			mov bh,0
+ 10AE  CD 10			int 10h
+				;********************************BOX3**********************************
+ 10B0  B4 06			mov ah,6
+ 10B2  B0 00			mov al,0
+ 10B4  B5 0A			mov ch,10
+ 10B6  B1 20			mov cl,32
+ 10B8  B6 12			mov dh,18
+ 10BA  B2 2C			mov dl,44
+ 10BC  B7 09			mov bh,9
+ 10BE  CD 10			int 10h
+				;*************************NUMBER4********************************
+ 10C0  B4 06			mov ah,6
+ 10C2  B0 00			mov al,0
+ 10C4  B5 0B			mov ch,11
+ 10C6  B1 2A			mov cl,42
+ 10C8  B6 11			mov dh,17
+ 10CA  B2 2B			mov dl,43
+ 10CC  B7 00			mov bh,0
+ 10CE  CD 10			int 10h
+
+ 10D0  B4 06			mov ah,6
+ 10D2  B0 00			mov al,0
+ 10D4  B5 0E			mov ch,14
+ 10D6  B1 22			mov cl,34
+ 10D8  B6 0E			mov dh,14
+ 10DA  B2 2B			mov dl,43
+ 10DC  B7 00			mov bh,0
+ 10DE  CD 10			int 10h
+
+ 10E0  B4 06			mov ah,6
+ 10E2  B0 00			mov al,0
+ 10E4  B5 0B			mov ch,11
+ 10E6  B1 21			mov cl,33
+ 10E8  B6 0E			mov dh,14
+ 10EA  B2 22			mov dl,34
+ 10EC  B7 00			mov bh,0
+ 10EE  CD 10			int 10h
+
+				;********************************BOX4************************************
+ 10F0  B4 06			mov ah,6
+ 10F2  B0 00			mov al,0
+ 10F4  B5 0A			mov ch,10
+ 10F6  B1 2E			mov cl,46
+ 10F8  B5 0A			mov ch,10
+ 10FA  B6 12			mov dh,18
+ 10FC  B2 3A			mov dl,58
+ 10FE  B7 08			mov bh,8
+ 1100  CD 10			int 10h
+				;******************************NUMBER9**********************************
+ 1102  B4 06			mov ah,6
+ 1104  B0 00			mov al,0
+ 1106  B5 0B			mov ch,11
+ 1108  B1 38			mov cl,56
+ 110A  B6 11			mov dh,17
+ 110C  B2 39			mov dl,57
+ 110E  B7 00			mov bh,0
+ 1110  CD 10			int 10h
+
+ 1112  B4 06			mov ah,6
+ 1114  B0 00			mov al,0
+ 1116  B5 0B			mov ch,11
+ 1118  B1 31			mov cl,49
+ 111A  B6 0B			mov dh,11
+ 111C  B2 38			mov dl,56
+ 111E  B7 00			mov bh,0
+ 1120  CD 10			int 10h
+
+ 1122  B4 06			mov ah,6
+ 1124  B0 00			mov al,0
+ 1126  B5 0B			mov ch,11
+ 1128  B1 2F			mov cl,47
+ 112A  B6 0E			mov dh,14
+ 112C  B2 30			mov dl,48
+ 112E  B7 00			mov bh,0
+ 1130  CD 10			int 10h
+
+ 1132  B4 06			mov ah,6
+ 1134  B0 00			mov al,0
+ 1136  B5 0E			mov ch,14
+ 1138  B1 31			mov cl,49
+ 113A  B6 0E			mov dh,14
+ 113C  B2 37			mov dl,55
+ 113E  B7 00			mov bh,0
+ 1140  CD 10			int 10h
+				;********************************BOX5************************************
+ 1142  B4 06			mov ah,6
+ 1144  B0 00			mov al,0
+ 1146  B5 0A			mov ch,10
+ 1148  B1 3C			mov cl,60
+ 114A  B6 12			mov dh,18
+ 114C  B2 48			mov dl,72
+ 114E  B7 04			mov bh,4
+ 1150  CD 10			int 10h
+				;***********************************NUMBER3*****************************
+ 1152  B4 06			mov ah,06
+ 1154  B0 00			mov al,0
+ 1156  B5 0B			mov ch,11
+ 1158  B1 3D			mov cl,61
+ 115A  B6 0B			mov dh,11
+ 115C  B2 45			mov dl,69
+ 115E  B7 00			mov bh,0
+ 1160  CD 10			int 10h
+
+ 1162  B4 06			mov ah,6
+ 1164  B0 00			mov al,0
+ 1166  B5 0B			mov ch,11
+ 1168  B1 46			mov cl,70
+ 116A  B6 11			mov dh,17
+ 116C  B2 47			mov dl,71
+ 116E  B7 00			mov bh,0
+ 1170  CD 10			int 10h
+
+ 1172  B4 06			mov ah,6
+ 1174  B0 00			mov al,0
+ 1176  B5 11			mov ch,17
+ 1178  B1 3D			mov cl,61
+ 117A  B6 11			mov dh,17
+ 117C  B2 46			mov dl,70
+ 117E  B7 00			mov bh,0
+ 1180  CD 10			int 10h
+
+ 1182  B4 06			mov ah,6
+ 1184  B0 00			mov al,0
+ 1186  B5 0E			mov ch,14
+ 1188  B1 3D			mov cl,61
+ 118A  B6 0E			mov dh,14
+ 118C  B2 46			mov dl,70
+ 118E  B7 00			mov bh,0
+ 1190  CD 10			int 10h
+
+				;*************************************************************************
+ 1192  B4 02			mov ah,02h
+ 1194  B7 00			mov bh,0
+ 1196  B6 1D			mov dh,29     ;cursor position ;dh max=28
+ 1198  B2 1E			mov dl,30
+ 119A  CD 10			int 10h
+
+ 119C  BA 0081 R		mov dx,offset msg5
+ 119F  B4 09			mov ah,09
+ 11A1  CD 21			int 21h
+
+ 11A3  C3			ret
+ 11A4				display_start1 endp
+
+ 11A4				display_start2 proc
+ 11A4  B4 02			mov ah,02h
+ 11A6  B7 00			mov bh,0
+ 11A8  B6 00			mov dh,0
+ 11AA  B2 00			mov dl,0
+ 11AC  CD 10			int 10h
+
+ 11AE  B4 06			mov ah,06
+ 11B0  B0 00			mov al,0
+ 11B2  B5 01			mov ch,1
+ 11B4  B1 02			mov cl,2
+ 11B6  B6 08			mov dh,8
+ 11B8  B2 03			mov dl,3
+ 11BA  B7 02			mov bh,2
+ 11BC  CD 10			int 10h
+
+ 11BE  B4 06			mov ah,06
+ 11C0  B0 00			mov al,0
+ 11C2  B5 01			mov ch,1
+ 11C4  B1 04			mov cl,4
+ 11C6  B6 01			mov dh,1
+ 11C8  B2 05			mov dl,5
+ 11CA  B7 06			mov bh,6
+ 11CC  CD 10			int 10h
+
+ 11CE  B4 06			mov ah,06
+ 11D0  B0 00			mov al,0
+ 11D2  B5 02			mov ch,2
+ 11D4  B1 05			mov cl,5
+ 11D6  B6 02			mov dh,2
+ 11D8  B2 06			mov dl,6
+ 11DA  B7 09			mov bh,9
+ 11DC  CD 10			int 10h
+
+ 11DE  B4 06			mov ah,06
+ 11E0  B0 00			mov al,0
+ 11E2  B5 03			mov ch,3
+ 11E4  B1 06			mov cl,6
+ 11E6  B6 03			mov dh,3
+ 11E8  B2 07			mov dl,7
+ 11EA  B7 09			mov bh,9
+ 11EC  CD 10			int 10h
+
+ 11EE  B4 06			mov ah,06
+ 11F0  B0 00			mov al,0
+ 11F2  B5 04			mov ch,4
+ 11F4  B1 07			mov cl,7
+ 11F6  B6 04			mov dh,4
+ 11F8  B2 08			mov dl,8
+ 11FA  B7 09			mov bh,9
+ 11FC  CD 10			int 10h
+
+ 11FE  B4 06			mov ah,06
+ 1200  B0 00			mov al,0
+ 1202  B5 05			mov ch,5
+ 1204  B1 08			mov cl,8
+ 1206  B6 05			mov dh,5
+ 1208  B2 09			mov dl,9
+ 120A  B7 09			mov bh,9
+ 120C  CD 10			int 10h
+
+ 120E  B4 06			mov ah,06
+ 1210  B0 00			mov al,0
+ 1212  B5 06			mov ch,6
+ 1214  B1 09			mov cl,9
+ 1216  B6 06			mov dh,6
+ 1218  B2 0A			mov dl,10
+ 121A  B7 09			mov bh,9
+ 121C  CD 10			int 10h
+
+ 121E  B4 06			mov ah,06
+ 1220  B0 00			mov al,0
+ 1222  B5 07			mov ch,7
+ 1224  B1 0A			mov cl,10
+ 1226  B6 07			mov dh,7
+ 1228  B2 0B			mov dl,11
+ 122A  B7 07			mov bh,7
+ 122C  CD 10			int 10h
+
+ 122E  B4 06			mov ah,06
+ 1230  B0 00			mov al,0
+ 1232  B5 08			mov ch,8
+ 1234  B1 0B			mov cl,11
+ 1236  B6 08			mov dh,8
+ 1238  B2 0C			mov dl,12
+ 123A  B7 09			mov bh,9
+ 123C  CD 10			int 10h
+
+ 123E  B4 06			mov ah,06
+ 1240  B0 00			mov al,0
+ 1242  B5 01			mov ch,1
+ 1244  B1 0C			mov cl,12
+ 1246  B6 08			mov dh,8
+ 1248  B2 0D			mov dl,13
+ 124A  B7 02			mov bh,2
+ 124C  CD 10			int 10h
+
+ 124E  B4 06			mov ah,06
+ 1250  B0 00			mov al,0
+ 1252  B5 01			mov ch,1
+ 1254  B1 0F			mov cl,15
+ 1256  B6 08			mov dh,8
+ 1258  B2 10			mov dl,16
+ 125A  B7 09			mov bh,9
+ 125C  CD 10			int 10h
+
+ 125E  B4 06			mov ah,06
+ 1260  B0 00			mov al,0
+ 1262  B5 08			mov ch,8
+ 1264  B1 11			mov cl,17
+ 1266  B6 08			mov dh,8
+ 1268  B2 17			mov dl,23
+ 126A  B7 01			mov bh,1
+ 126C  CD 10			int 10h
+
+ 126E  B4 06			mov ah,06
+ 1270  B0 00			mov al,0
+ 1272  B5 01			mov ch,1
+ 1274  B1 18			mov cl,24
+ 1276  B6 08			mov dh,8
+ 1278  B2 19			mov dl,25
+ 127A  B7 09			mov bh,9
+ 127C  CD 10			int 10h
+
+ 127E  B4 06			mov ah,06
+ 1280  B0 00			mov al,0
+ 1282  B5 01			mov ch,1
+ 1284  B1 1B			mov cl,27
+ 1286  B6 08			mov dh,8
+ 1288  B2 1C			mov dl,28
+ 128A  B7 08			mov bh,8
+ 128C  CD 10			int 10h
+
+ 128E  B4 06			mov ah,06
+ 1290  B0 00			mov al,0
+ 1292  B5 01			mov ch,1
+ 1294  B1 1D			mov cl,29
+ 1296  B6 01			mov dh,1
+ 1298  B2 1E			mov dl,30
+ 129A  B7 09			mov bh,9
+ 129C  CD 10			int 10h
+
+ 129E  B4 06			mov ah,06
+ 12A0  B0 00			mov al,0
+ 12A2  B5 02			mov ch,2
+ 12A4  B1 1E			mov cl,30
+ 12A6  B6 02			mov dh,2
+ 12A8  B2 1F			mov dl,31
+ 12AA  B7 01			mov bh,1
+ 12AC  CD 10			int 10h
+
+ 12AE  B4 06			mov ah,06
+ 12B0  B0 00			mov al,0
+ 12B2  B5 03			mov ch,3
+ 12B4  B1 1F			mov cl,31
+ 12B6  B6 03			mov dh,3
+ 12B8  B2 20			mov dl,32
+ 12BA  B7 09			mov bh,9
+ 12BC  CD 10			int 10h
+
+ 12BE  B4 06			mov ah,06
+ 12C0  B0 00			mov al,0
+ 12C2  B5 04			mov ch,4
+ 12C4  B1 20			mov cl,32
+ 12C6  B6 04			mov dh,4
+ 12C8  B2 21			mov dl,33
+ 12CA  B7 09			mov bh,9
+ 12CC  CD 10			int 10h
+
+ 12CE  B4 06			mov ah,06
+ 12D0  B0 00			mov al,0
+ 12D2  B5 03			mov ch,3
+ 12D4  B1 21			mov cl,33
+ 12D6  B6 03			mov dh,3
+ 12D8  B2 22			mov dl,34
+ 12DA  B7 09			mov bh,9
+ 12DC  CD 10			int 10h
+
+ 12DE  B4 06			mov ah,06
+ 12E0  B0 00			mov al,0
+ 12E2  B5 02			mov ch,2
+ 12E4  B1 22			mov cl,34
+ 12E6  B6 02			mov dh,2
+ 12E8  B2 23			mov dl,35
+ 12EA  B7 09			mov bh,9
+ 12EC  CD 10			int 10h
+
+ 12EE  B4 06			mov ah,06
+ 12F0  B0 00			mov al,0
+ 12F2  B5 01			mov ch,1
+ 12F4  B1 23			mov cl,35
+ 12F6  B6 01			mov dh,1
+ 12F8  B2 24			mov dl,36
+ 12FA  B7 02			mov bh,2
+ 12FC  CD 10			int 10h
+
+ 12FE  B4 06			mov ah,06
+ 1300  B0 00			mov al,0
+ 1302  B5 01			mov ch,1
+ 1304  B1 25			mov cl,37
+ 1306  B6 08			mov dh,8
+ 1308  B2 26			mov dl,38
+ 130A  B7 06			mov bh,6
+ 130C  CD 10			int 10h
+
+ 130E  B4 06			mov ah,06
+ 1310  B0 00			mov al,0
+ 1312  B5 01			mov ch,1
+ 1314  B1 28			mov cl,40
+ 1316  B6 08			mov dh,8
+ 1318  B2 29			mov dl,41
+ 131A  B7 05			mov bh,5
+ 131C  CD 10			int 10h
+
+ 131E  B4 06			mov ah,06
+ 1320  B0 00			mov al,0
+ 1322  B5 01			mov ch,1
+ 1324  B1 2A			mov cl,42
+ 1326  B6 01			mov dh,1
+ 1328  B2 30			mov dl,48
+ 132A  B7 09			mov bh,9
+ 132C  CD 10			int 10h
+
+ 132E  B4 06			mov ah,06
+ 1330  B0 00			mov al,0
+ 1332  B5 01			mov ch,1
+ 1334  B1 31			mov cl,49
+ 1336  B6 08			mov dh,8
+ 1338  B2 32			mov dl,50
+ 133A  B7 07			mov bh,7
+ 133C  CD 10			int 10h
+
+ 133E  B4 06			mov ah,06
+ 1340  B0 00			mov al,0
+ 1342  B5 08			mov ch,8
+ 1344  B1 2A			mov cl,42
+ 1346  B6 08			mov dh,8
+ 1348  B2 30			mov dl,48
+ 134A  B7 03			mov bh,3
+ 134C  CD 10			int 10h
+
+ 134E  B4 06			mov ah,06
+ 1350  B0 00			mov al,0
+ 1352  B5 04			mov ch,4
+ 1354  B1 2A			mov cl,42
+ 1356  B6 04			mov dh,4
+ 1358  B2 30			mov dl,48
+ 135A  B7 02			mov bh,2
+ 135C  CD 10			int 10h
+
+ 135E  B4 06			mov ah,06
+ 1360  B0 00			mov al,0
+ 1362  B5 01			mov ch,1
+ 1364  B1 34			mov cl,52
+ 1366  B6 08			mov dh,8
+ 1368  B2 35			mov dl,53
+ 136A  B7 03			mov bh,3
+ 136C  CD 10			int 10h
+
+ 136E  B4 06			mov ah,6
+ 1370  B0 00			mov al,0
+ 1372  B5 01			mov ch,1
+ 1374  B1 36			mov cl,54
+ 1376  B6 01			mov dh,1
+ 1378  B2 3C			mov dl,60
+ 137A  B7 08			mov bh,8
+ 137C  CD 10			int 10h
+
+ 137E  B4 06			mov ah,6
+ 1380  B0 00			mov al,0
+ 1382  B5 04			mov ch,4
+ 1384  B1 36			mov cl,54
+ 1386  B6 04			mov dh,4
+ 1388  B2 3C			mov dl,60
+ 138A  B7 04			mov bh,4
+ 138C  CD 10			int 10h
+
+ 138E  B4 06			mov ah,6
+ 1390  B0 00			mov al,0
+ 1392  B5 08			mov ch,8
+ 1394  B1 36			mov cl,54
+ 1396  B6 08			mov dh,8
+ 1398  B2 3C			mov dl,60
+ 139A  B7 01			mov bh,1
+ 139C  CD 10			int 10h
+
+ 139E  B4 06			mov ah,6
+ 13A0  B0 00			mov al,0
+ 13A2  B5 01			mov ch,1
+ 13A4  B1 3E			mov cl,62
+ 13A6  B6 08			mov dh,8
+ 13A8  B2 3F			mov dl,63
+ 13AA  B7 02			mov bh,2
+ 13AC  CD 10			int 10h
+
+ 13AE  B4 06			mov ah,6
+ 13B0  B0 00			mov al,0
+ 13B2  B5 01			mov ch,1
+ 13B4  B1 40			mov cl,64
+ 13B6  B6 01			mov dh,1
+ 13B8  B2 46			mov dl,70
+ 13BA  B7 04			mov bh,4
+ 13BC  CD 10			int 10h
+
+ 13BE  B4 06			mov ah,6
+ 13C0  B0 00			mov al,0
+ 13C2  B5 01			mov ch,1
+ 13C4  B1 47			mov cl,71
+ 13C6  B6 04			mov dh,4
+ 13C8  B2 48			mov dl,72
+ 13CA  B7 03			mov bh,3
+ 13CC  CD 10			int 10h
+
+ 13CE  B4 06			mov ah,6
+ 13D0  B0 00			mov al,0
+ 13D2  B5 04			mov ch,4
+ 13D4  B1 40			mov cl,64
+ 13D6  B6 04			mov dh,4
+ 13D8  B2 46			mov dl,70
+ 13DA  B7 05			mov bh,5
+ 13DC  CD 10			int 10h
+
+ 13DE  B4 06			mov ah,6
+ 13E0  B0 00			mov al,0
+ 13E2  B5 05			mov ch,5
+ 13E4  B1 40			mov cl,64
+ 13E6  B6 05			mov dh,5
+ 13E8  B2 41			mov dl,65
+ 13EA  B7 08			mov bh,8
+ 13EC  CD 10			int 10h
+
+ 13EE  B4 06			mov ah,6
+ 13F0  B0 00			mov al,0
+ 13F2  B5 06			mov ch,6
+ 13F4  B1 41			mov cl,65
+ 13F6  B6 06			mov dh,6
+ 13F8  B2 42			mov dl,66
+ 13FA  B7 04			mov bh,4
+ 13FC  CD 10			int 10h
+
+ 13FE  B4 06			mov ah,6
+ 1400  B0 00			mov al,0
+ 1402  B5 07			mov ch,7
+ 1404  B1 43			mov cl,67
+ 1406  B6 07			mov dh,7
+ 1408  B2 44			mov dl,68
+ 140A  B7 06			mov bh,6
+ 140C  CD 10			int 10h
+
+ 140E  B4 06			mov ah,6
+ 1410  B0 00			mov al,0
+ 1412  B5 08			mov ch,8
+ 1414  B1 45			mov cl,69
+ 1416  B6 08			mov dh,8
+ 1418  B2 46			mov dl,70
+ 141A  B7 01			mov bh,1
+ 141C  CD 10			int 10h
+				;*************************************************************************
+
+ 141E  B4 06			mov ah,6
+ 1420  B0 00			mov al,0
+ 1422  B5 14			mov ch,20
+ 1424  B1 0A			mov cl,10
+ 1426  B6 1C			mov dh,28
+ 1428  B2 0B			mov dl,11
+ 142A  B7 06			mov bh,6
+ 142C  CD 10			int 10h
+
+ 142E  B4 06			mov ah,6
+ 1430  B0 00			mov al,0
+ 1432  B5 14			mov ch,20
+ 1434  B1 0C			mov cl,12
+ 1436  B6 14			mov dh,20
+ 1438  B2 13			mov dl,19
+ 143A  B7 02			mov bh,2
+ 143C  CD 10			int 10h
+
+ 143E  B4 06			mov ah,6
+ 1440  B0 00			mov al,0
+ 1442  B5 1C			mov ch,28
+ 1444  B1 0C			mov cl,12
+ 1446  B6 1C			mov dh,28
+ 1448  B2 13			mov dl,19
+ 144A  B7 07			mov bh,7
+ 144C  CD 10			int 10h
+
+ 144E  B4 06			mov ah,06
+ 1450  B0 00			mov al,0
+ 1452  B5 14			mov ch,20
+ 1454  B1 15			mov cl,21
+ 1456  B6 1C			mov dh,28
+ 1458  B2 16			mov dl,22
+ 145A  B7 06			mov bh,6
+ 145C  CD 10			int 10h
+
+ 145E  B4 06			mov ah,6
+ 1460  B0 00			mov al,0
+ 1462  B5 14			mov ch,20
+ 1464  B1 17			mov cl,23
+ 1466  B6 14			mov dh,20
+ 1468  B2 1E			mov dl,30
+ 146A  B7 04			mov bh,4
+ 146C  CD 10			int 10h
+
+ 146E  B4 06			mov ah,6
+ 1470  B0 00			mov al,0
+ 1472  B5 14			mov ch,20
+ 1474  B1 1E			mov cl,30
+ 1476  B6 18			mov dh,24
+ 1478  B2 1F			mov dl,31
+ 147A  B7 09			mov bh,9
+ 147C  CD 10			int 10h
+
+ 147E  B4 06			mov ah,6
+ 1480  B0 00			mov al,0
+ 1482  B5 18			mov ch,24
+ 1484  B1 17			mov cl,23
+ 1486  B6 18			mov dh,24
+ 1488  B2 1D			mov dl,29
+ 148A  B7 01			mov bh,1
+ 148C  CD 10			int 10h
+
+ 148E  B4 06			mov ah,6
+ 1490  B0 00			mov al,0
+ 1492  B5 19			mov ch,25
+ 1494  B1 17			mov cl,23
+ 1496  B6 19			mov dh,25
+ 1498  B2 18			mov dl,24
+ 149A  B7 08			mov bh,8
+ 149C  CD 10			int 10h
+
+ 149E  B4 06			mov ah,6
+ 14A0  B0 00			mov al,0
+ 14A2  B5 1A			mov ch,26
+ 14A4  B1 18			mov cl,24
+ 14A6  B6 1A			mov dh,26
+ 14A8  B2 19			mov dl,25
+ 14AA  B7 07			mov bh,7
+ 14AC  CD 10			int 10h
+
+ 14AE  B4 06			mov ah,6
+ 14B0  B0 00			mov al,0
+ 14B2  B5 1B			mov ch,27
+ 14B4  B1 1A			mov cl,26
+ 14B6  B6 1B			mov dh,27
+ 14B8  B2 1B			mov dl,27
+ 14BA  B7 09			mov bh,9
+ 14BC  CD 10			int 10h
+
+ 14BE  B4 06			mov ah,6
+ 14C0  B0 00			mov al,0
+ 14C2  B5 1C			mov ch,28
+ 14C4  B1 1C			mov cl,28
+ 14C6  B6 1C			mov dh,28
+ 14C8  B2 1D			mov dl,29
+ 14CA  B7 04			mov bh,4
+ 14CC  CD 10			int 10h
+
+ 14CE  B4 06			mov ah,6
+ 14D0  B0 00			mov al,0
+ 14D2  B5 14			mov ch,20
+ 14D4  B1 21			mov cl,33
+ 14D6  B6 1C			mov dh,28
+ 14D8  B2 22			mov dl,34
+ 14DA  B7 04			mov bh,4
+ 14DC  CD 10			int 10h
+
+ 14DE  B4 06			mov ah,6
+ 14E0  B0 00			mov al,0
+ 14E2  B5 1C			mov ch,28
+ 14E4  B1 23			mov cl,35
+ 14E6  B6 1C			mov dh,28
+ 14E8  B2 2A			mov dl,42
+ 14EA  B7 02			mov bh,2
+ 14EC  CD 10			int 10h
+
+ 14EE  B4 06			mov ah,6
+ 14F0  B0 00			mov al,0
+ 14F2  B5 14			mov ch,20
+ 14F4  B1 2B			mov cl,43
+ 14F6  B6 1C			mov dh,28
+ 14F8  B2 2C			mov dl,44
+ 14FA  B7 07			mov bh,7
+ 14FC  CD 10			int 10h
+
+ 14FE  B4 06			mov ah,6
+ 1500  B0 00			mov al,0
+ 1502  B5 14			mov ch,20
+ 1504  B1 2E			mov cl,46
+ 1506  B6 18			mov dh,24
+ 1508  B2 2F			mov dl,47
+ 150A  B7 03			mov bh,3
+ 150C  CD 10			int 10h
+
+ 150E  B4 06			mov ah,6
+ 1510  B0 00			mov al,0
+ 1512  B5 18			mov ch,24
+ 1514  B1 30			mov cl,48
+ 1516  B6 18			mov dh,24
+ 1518  B2 36			mov dl,54
+ 151A  B7 08			mov bh,8
+ 151C  CD 10			int 10h
+
+ 151E  B4 06			mov ah,6
+ 1520  B0 00			mov al,0
+ 1522  B5 18			mov ch,24
+ 1524  B1 37			mov cl,55
+ 1526  B6 1C			mov dh,28
+ 1528  B2 38			mov dl,56
+ 152A  B7 01			mov bh,1
+ 152C  CD 10			int 10h
+
+ 152E  B4 06			mov ah,6
+ 1530  B0 00			mov al,0
+ 1532  B5 1C			mov ch,28
+ 1534  B1 2E			mov cl,46
+ 1536  B6 1C			mov dh,28
+ 1538  B2 38			mov dl,56
+ 153A  B7 03			mov bh,3
+ 153C  CD 10			int 10h
+
+ 153E  B4 06			mov ah,6
+ 1540  B0 00			mov al,0
+ 1542  B5 14			mov ch,20
+ 1544  B1 30			mov cl,48
+ 1546  B6 14			mov dh,20
+ 1548  B2 38			mov dl,56
+ 154A  B7 04			mov bh,4
+ 154C  CD 10			int 10h
+
+ 154E  B4 06			mov ah,6
+ 1550  B0 00			mov al,0
+ 1552  B5 14			mov ch,20
+ 1554  B1 3A			mov cl,58
+ 1556  B6 1C			mov dh,28
+ 1558  B2 3B			mov dl,59
+ 155A  B7 02			mov bh,2
+ 155C  CD 10			int 10h
+
+ 155E  B4 06			mov ah,6
+ 1560  B0 00			mov al,0
+ 1562  B5 14			mov ch,20
+ 1564  B1 45			mov cl,69
+ 1566  B6 1C			mov dh,28
+ 1568  B2 46			mov dl,70
+ 156A  B7 08			mov bh,8
+ 156C  CD 10			int 10h
+
+ 156E  B4 06			mov ah,6
+ 1570  B0 00			mov al,0
+ 1572  B5 18			mov ch,24
+ 1574  B1 3C			mov cl,60
+ 1576  B6 18			mov dh,24
+ 1578  B2 44			mov dl,68
+ 157A  B7 01			mov bh,1
+ 157C  CD 10			int 10h
+				;************************************************************************
+				;**************************BOXES****************************************
+				;**************************BOX1**********************************************
+ 157E  B4 06			mov ah,6
+ 1580  B0 00			mov al,0
+ 1582  B5 0A			mov ch,10
+ 1584  B1 04			mov cl,4
+ 1586  B6 12			mov dh,18
+ 1588  B2 10			mov dl,16
+ 158A  B7 04			mov bh,4
+ 158C  CD 10			int 10h
+				;******************************BOX2*****************************************
+ 158E  B4 06			mov ah,6
+ 1590  B0 00			mov al,0
+ 1592  B5 0A			mov ch,10
+ 1594  B1 12			mov cl,18
+ 1596  B6 12			mov dh,18
+ 1598  B2 1E			mov dl,30
+ 159A  B7 06			mov bh,6
+ 159C  CD 10			int 10h
+				;********************************BOX3**********************************
+ 159E  B4 06			mov ah,6
+ 15A0  B0 00			mov al,0
+ 15A2  B5 0A			mov ch,10
+ 15A4  B1 20			mov cl,32
+ 15A6  B6 12			mov dh,18
+ 15A8  B2 2C			mov dl,44
+ 15AA  B7 05			mov bh,5
+ 15AC  CD 10			int 10h
+				;********************************BOX4************************************
+ 15AE  B4 06			mov ah,6
+ 15B0  B0 00			mov al,0
+ 15B2  B5 0A			mov ch,10
+ 15B4  B1 2E			mov cl,46
+ 15B6  B5 0A			mov ch,10
+ 15B8  B6 12			mov dh,18
+ 15BA  B2 3A			mov dl,58
+ 15BC  B7 09			mov bh,9
+ 15BE  CD 10			int 10h
+				;********************************BOX5************************************
+ 15C0  B4 06			mov ah,6
+ 15C2  B0 00			mov al,0
+ 15C4  B5 0A			mov ch,10
+ 15C6  B1 3C			mov cl,60
+ 15C8  B6 12			mov dh,18
+ 15CA  B2 48			mov dl,72
+ 15CC  B7 01			mov bh,1
+ 15CE  CD 10			int 10h
+				;*************************NUMBER7*********************************************
+ 15D0  B4 06			mov ah,6
+ 15D2  B0 00			mov al,0
+ 15D4  B5 0B			mov ch,11
+ 15D6  B1 22			mov cl,34
+ 15D8  B6 0B			mov dh,11
+ 15DA  B2 29			mov dl,41
+ 15DC  B7 00			mov bh,0
+ 15DE  CD 10			int 10h
+
+ 15E0  B4 06			mov ah,6
+ 15E2  B0 00			mov al,0
+ 15E4  B5 0B			mov ch,11
+ 15E6  B1 2A			mov cl,42
+ 15E8  B6 11			mov dh,17
+ 15EA  B2 2B			mov dl,43
+ 15EC  B7 00			mov bh,0
+ 15EE  CD 10			int 10h
+				;*********************NUMBER1******************************************
+ 15F0  B4 06			mov ah,6
+ 15F2  B0 00			mov al,0
+ 15F4  B5 0B			mov ch,11
+ 15F6  B1 09			mov cl,9
+ 15F8  B6 11			mov dh,17
+ 15FA  B2 0A			mov dl,10
+ 15FC  B7 00			mov bh,0
+ 15FE  CD 10			int 10h
+				;*************************NUMBER4********************************
+ 1600  B4 06			mov ah,6
+ 1602  B0 00			mov al,0
+ 1604  B5 0B			mov ch,11
+ 1606  B1 1C			mov cl,28
+ 1608  B6 11			mov dh,17
+ 160A  B2 1D			mov dl,29
+ 160C  B7 00			mov bh,0
+ 160E  CD 10			int 10h
+
+ 1610  B4 06			mov ah,6
+ 1612  B0 00			mov al,0
+ 1614  B5 0E			mov ch,14
+ 1616  B1 14			mov cl,20
+ 1618  B6 0E			mov dh,14
+ 161A  B2 1B			mov dl,27
+ 161C  B7 00			mov bh,0
+ 161E  CD 10			int 10h
+
+ 1620  B4 06			mov ah,6
+ 1622  B0 00			mov al,0
+ 1624  B5 0B			mov ch,11
+ 1626  B1 13			mov cl,19
+ 1628  B6 0E			mov dh,14
+ 162A  B2 14			mov dl,20
+ 162C  B7 00			mov bh,0
+ 162E  CD 10			int 10h
+
+
+				;******************************NUMBER9**********************************
+ 1630  B4 06			mov ah,6
+ 1632  B0 00			mov al,0
+ 1634  B5 0B			mov ch,11
+ 1636  B1 46			mov cl,70
+ 1638  B6 11			mov dh,17
+ 163A  B2 47			mov dl,71
+ 163C  B7 00			mov bh,0
+ 163E  CD 10			int 10h
+
+ 1640  B4 06			mov ah,6
+ 1642  B0 00			mov al,0
+ 1644  B5 0B			mov ch,11
+ 1646  B1 3E			mov cl,62
+ 1648  B6 0B			mov dh,11
+ 164A  B2 45			mov dl,69
+ 164C  B7 00			mov bh,0
+ 164E  CD 10			int 10h
+
+ 1650  B4 06			mov ah,6
+ 1652  B0 00			mov al,0
+ 1654  B5 0B			mov ch,11
+ 1656  B1 3D			mov cl,61
+ 1658  B6 0E			mov dh,14
+ 165A  B2 3E			mov dl,62
+ 165C  B7 00			mov bh,0
+ 165E  CD 10			int 10h
+
+ 1660  B4 06			mov ah,6
+ 1662  B0 00			mov al,0
+ 1664  B5 0E			mov ch,14
+ 1666  B1 3E			mov cl,62
+ 1668  B6 0E			mov dh,14
+ 166A  B2 45			mov dl,69
+ 166C  B7 00			mov bh,0
+ 166E  CD 10			int 10h
+				;***********************************NUMBER3*****************************
+ 1670  B4 06			mov ah,06
+ 1672  B0 00			mov al,0
+ 1674  B5 0B			mov ch,11
+ 1676  B1 2F			mov cl,47
+ 1678  B6 0B			mov dh,11
+ 167A  B2 38			mov dl,56
+ 167C  B7 00			mov bh,0
+ 167E  CD 10			int 10h
+
+ 1680  B4 06			mov ah,6
+ 1682  B0 00			mov al,0
+ 1684  B5 0B			mov ch,11
+ 1686  B1 38			mov cl,56
+ 1688  B6 11			mov dh,17
+ 168A  B2 39			mov dl,57
+ 168C  B7 00			mov bh,0
+ 168E  CD 10			int 10h
+
+ 1690  B4 06			mov ah,6
+ 1692  B0 00			mov al,0
+ 1694  B5 11			mov ch,17
+ 1696  B1 2F			mov cl,47
+ 1698  B6 11			mov dh,17
+ 169A  B2 39			mov dl,57
+ 169C  B7 00			mov bh,0
+ 169E  CD 10			int 10h
+
+ 16A0  B4 06			mov ah,6
+ 16A2  B0 00			mov al,0
+ 16A4  B5 0E			mov ch,14
+ 16A6  B1 2F			mov cl,47
+ 16A8  B6 0E			mov dh,14
+ 16AA  B2 39			mov dl,57
+ 16AC  B7 00			mov bh,0
+ 16AE  CD 10			int 10h
+
+				;*************************************************************************
+ 16B0  B4 02			mov ah,02h
+ 16B2  B7 00			mov bh,0
+ 16B4  B6 1D			mov dh,29     ;cursor position ;dh max=28
+ 16B6  B2 1E			mov dl,30
+ 16B8  CD 10			int 10h
+
+ 16BA  BA 0081 R		mov dx,offset msg5
+ 16BD  B4 09			mov ah,09
+ 16BF  CD 21			int 21h
+
+ 16C1  C3			ret
+ 16C2				display_start2 endp
+
+ 16C2				get_name_function proc
+
+ 16C2  B4 02			mov ah,02h
+ 16C4  B6 14			mov dh,20
+ 16C6  B2 0F			mov dl,15
+ 16C8  CD 10			int 10h
+
+ 16CA				lc:
+ 16CA  B4 06			mov ah,6
+ 16CC  B0 00			mov al,0
+ 16CE  8A 2E 0018 R		mov ch,var10
+ 16D2  8A 0E 0019 R		mov cl,var11
+ 16D6  8A 36 001A R		mov dh,var12
+ 16DA  8A 16 001B R		mov dl,var13
+ 16DE  8A 3E 0029 R		mov bh,count
+ 16E2  CD 10			int 10h
+ 16E4  80 06 0019 R 0A		add var11,10
+ 16E9  80 06 001B R 0A		add var13,10
+ 16EE  FE 06 0029 R		inc count
+ 16F2  80 3E 0029 R 09		cmp count,9
+ 16F7  74 02			je ld
+ 16F9  EB CF			jmp lc
+
+ 16FB				ld:
+ 16FB  C6 06 0018 R 06		mov var10,6
+ 1700  C6 06 0019 R 00		mov var11,0
+ 1705  C6 06 001A R 0A		mov var12,10
+ 170A  C6 06 001B R 09		mov var13,9
+ 170F  C6 06 0029 R 01		mov count,1
+ 1714				lg:
+ 1714  B4 06			mov ah,6
+ 1716  B0 00			mov al,0
+ 1718  8A 2E 0018 R		mov ch,var10	 ;5
+ 171C  8A 0E 0019 R		mov cl,var11	 ;0
+ 1720  8A 36 001A R		mov dh,var12	 ;10
+ 1724  8A 16 001B R		mov dl,var13	 ;10
+ 1728  8A 3E 0029 R		mov bh,count
+ 172C  CD 10			int 10h
+ 172E  FE 06 0029 R		inc count
+ 1732  80 06 0018 R 05		add var10,5
+ 1737  80 06 001A R 05		add var12,5
+ 173C  80 3E 0029 R 06		cmp count,6
+ 1741  74 02			je lf
+ 1743  EB CF			jmp lg
+
+ 1745				lf:
+ 1745  C6 06 0018 R 06		mov var10,6
+ 174A  C6 06 0019 R 46		mov var11,70
+ 174F  C6 06 001A R 0A		mov var12,10
+ 1754  C6 06 001B R 4F		mov var13,79
+ 1759  C6 06 0029 R 04		mov count,4
+
+ 175E				lh:
+ 175E  B4 06			mov ah,6
+ 1760  B0 00			mov al,0
+ 1762  8A 2E 0018 R		mov ch,var10
+ 1766  8A 0E 0019 R		mov cl,var11
+ 176A  8A 36 001A R		mov dh,var12
+ 176E  8A 16 001B R		mov dl,var13
+ 1772  8A 3E 0029 R		mov bh,count
+ 1776  CD 10			int 10h
+ 1778  FE 06 0029 R		inc count
+ 177C  80 06 0018 R 05		add var10,5
+ 1781  80 06 001A R 05		add var12,5
+ 1786  80 3E 0029 R 09		cmp count,9
+ 178B  74 02			je li
+ 178D  EB CF			jmp lh
+
+ 178F				li:
+ 178F  C6 06 0018 R 22		mov var10,34
+ 1794  C6 06 0019 R 0A		mov var11,10
+ 1799  C6 06 001A R 27		mov var12,39
+ 179E  C6 06 001B R 13		mov var13,19
+ 17A3  C6 06 0029 R 02		mov count,2
+
+ 17A8				lk:
+ 17A8  B4 06			mov ah,6
+ 17AA  B0 00			mov al,0
+ 17AC  8A 2E 0018 R		mov ch,var10
+ 17B0  8A 0E 0019 R		mov cl,var11
+ 17B4  8A 36 001A R		mov dh,var12
+ 17B8  8A 16 001B R		mov dl,var13
+ 17BC  8A 3E 0029 R		mov bh,count
+ 17C0  CD 10			int 10h
+ 17C2  FE 06 0029 R		inc count
+ 17C6  80 06 0019 R 0A		add var11,10
+ 17CB  80 06 001B R 0A		add var13,10
+ 17D0  80 3E 0029 R 08		cmp count,8
+ 17D5  74 02			je lm
+ 17D7  EB CF			jmp lk
+
+ 17D9				lm:
+
+ 17D9  B4 06			mov ah,6
+ 17DB  B0 00			mov al,0
+ 17DD  B5 08			mov ch,8
+ 17DF  B1 22			mov cl,34
+ 17E1  B6 09			mov dh,9
+ 17E3  B2 23			mov dl,35
+ 17E5  B7 09			mov bh,9
+ 17E7  CD 10			int 10h
+
+ 17E9  B4 06			mov ah,6
+ 17EB  B0 00			mov al,0
+ 17ED  B5 08			mov ch,8
+ 17EF  B1 2A			mov cl,42
+ 17F1  B6 09			mov dh,9
+ 17F3  B2 2B			mov dl,43
+ 17F5  B7 09			mov bh,9
+ 17F7  CD 10			int 10h
+
+ 17F9  B4 06			mov ah,6
+ 17FB  B0 00			mov al,0
+ 17FD  B5 0E			mov ch,14
+ 17FF  B1 1C			mov cl,28
+ 1801  B6 0E			mov dh,14
+ 1803  B2 31			mov dl,49
+ 1805  B7 09			mov bh,9
+ 1807  CD 10			int 10h
+
+ 1809  B4 06			mov ah,6
+ 180B  B0 00			mov al,0
+ 180D  B5 0C			mov ch,12
+ 180F  B1 1C			mov cl,28
+ 1811  B6 0D			mov dh,13
+ 1813  B2 1D			mov dl,29
+ 1815  B7 09			mov bh,9
+ 1817  CD 10			int 10h
+
+ 1819  B4 06			mov ah,6
+ 181B  B0 00			mov al,0
+ 181D  B5 0C			mov ch,12
+ 181F  B1 30			mov cl,48
+ 1821  B6 0D			mov dh,13
+ 1823  B2 31			mov dl,49
+ 1825  B7 09			mov bh,9
+ 1827  CD 10			int 10h
+
+ 1829  BA 0099 R		mov dx,offset msg6
+ 182C  B4 09			mov ah,09h
+ 182E  CD 21			int 21h
+
+ 1830  BE 0641 R		mov si,offset username
+ 1833				lq:
+ 1833  B4 01			mov ah,01
+ 1835  CD 21			int 21h
+ 1837  3C 0D			cmp al,13
+ 1839  74 08			je lr
+ 183B  88 04			mov [si],al
+ 183D  46			inc si
+ 183E  E8 0008			call sound
+ 1841  EB F0			jmp lq
+ 1843				lr:
+ 1843  C6 06 0029 R 00		mov count,0
+ 1848  C3			ret
+ 1849				get_name_function endp
+
+ 1849				sound proc
+ 1849  BA 2710			MOV	DX,10000	; Number of times to repeat whole routine.
+
+ 184C  BB 0001			MOV	BX,1		; Frequency value.
+
+ 184F  B0 B6			MOV	AL, 10110110B	; The Magic Number (use this binary number only)
+ 1851  E6 43			OUT     43H, AL          ; Send it to the initializing port 43H Timer 2.
+
+ 1853				NEXT_FREQUENCY:          ; This is were we will jump back to 2000 times.
+
+ 1853  8B C3			MOV     AX, BX           ; Move our Frequency value into AX.
+
+ 1855  E6 42			OUT     42H, AL          ; Send LSB to port 42H.
+ 1857  8A C4			MOV     AL, AH           ; Move MSB into AL  
+ 1859  E6 42			OUT     42H, AL          ; Send MSB to port 42H.
+
+ 185B  E4 61			IN      AL, 61H          ; Get current value of port 61H.
+ 185D  0C 03			OR      AL, 00000011B    ; OR AL to this value, forcing first two bits high.
+ 185F  E6 61			OUT     61H, AL          ; Copy it to port 61H of the PPI Chip
+				                         ; to turn ON the speaker.
+
+ 1861  B9 0064			MOV     CX, 100          ; Repeat loop 100 times
+ 1864				DELAY_LOOP:              ; Here is where we loop back too.
+ 1864  E2 FE			LOOP    DELAY_LOOP       ; Jump repeatedly to DELAY_LOOP until CX = 0
+
+
+ 1866  43			INC     BX               ; Incrementing the value of BX lowers 
+				                         ; the frequency each time we repeat the
+				                         ; whole routine
+
+ 1867  4A			DEC     DX               ; Decrement repeat routine count
+
+ 1868  83 FA 00			CMP     DX, 0            ; Is DX (repeat count) = to 0
+ 186B  75 E6			JNZ     NEXT_FREQUENCY   ; If not jump to NEXT_FREQUENCY
+				                         ; and do whole routine again.
+
+				                         ; Else DX = 0 time to turn speaker OFF
+
+ 186D  E4 61			IN      AL,61H           ; Get current value of port 61H.
+ 186F  24 FC			AND	AL,11111100B	; AND AL to this value, forcing first two bits low.
+ 1871  E6 61			OUT     61H,AL           ; Copy it to port 61H of the PPI Chip
+				                         ; to turn OFF the speaker.
+ 1873  C3			ret 
+ 1874				sound endp
+				;_
+				; PRINTING TWO DIGIT VALUE
+ 1874				PRI PROC		
+ 1874				PRINT:
+ 1874  B2 20				MOV DL,32   ;SPACE
+ 1876  B4 02				MOV AH,02H
+ 1878  CD 21				INT 21H
+ 187A  B8 0000				MOV AX,0
+ 187D  A1 004C R			MOV AX,MOVESPRINT;SAVES ELEMENT IN REGISTER
+ 1880  C7 06 004E R 0000		MOV DIGITCOUNT,0  ;COUNTS NO OF DIGITS IN AN ELEMENT
+					
+ 1886				PUSH_IN:
+ 1886  BA 0000				MOV DX,0
+ 1889  BB 000A				MOV BX,10 
+ 188C  F7 F3				DIV BX  ;  AX % 10
+ 188E  52				PUSH DX   ;PUSHES DIGIT IN A STACK
+ 188F  FF 06 004E R			INC DIGITCOUNT  ;COUNTS NO OF DIGITS IN A NUMBER
+ 1893  83 F8 00				CMP AX,0
+ 1896  75 EE				JNE PUSH_IN
+							
+ 1898				POP_UP:
+ 1898  83 3E 004E R 00			CMP DIGITCOUNT,0  ;STOPS WHEN EQUAL TO NO OF DIGITS
+ 189D  74 0E				JE EXT
+ 189F  FF 0E 004E R			DEC DIGITCOUNT
+ 18A3  5A				POP DX    ;POP FROM STACK ONE BY ONE
+ 18A4  83 C2 30				ADD DX,48
+ 18A7  B4 02				MOV AH,02H
+ 18A9  CD 21				INT 21H
+ 18AB  EB EB				JMP POP_UP
+						
+ 18AD				EXT:
+ 18AD  C3			RET
+ 18AE				PRI ENDP
+				;_
+ 18AE				PRI1 PROC		
+ 18AE				PRINT:
+ 18AE  B2 20				MOV DL,32   ;SPACE
+ 18B0  B4 02				MOV AH,02H
+ 18B2  CD 21				INT 21H
+ 18B4  B8 0000				MOV AX,0
+ 18B7  A1 0050 R			MOV AX,SCOREPRINT;SAVES ELEMENT IN REGISTER
+ 18BA  C7 06 0052 R 0000		MOV DIGITCOUNT1,0  ;COUNTS NO OF DIGITS IN AN ELEMENT
+					
+ 18C0				PUSH_IN:
+ 18C0  BA 0000				MOV DX,0
+ 18C3  BB 000A				MOV BX,10 
+ 18C6  F7 F3				DIV BX  ;  AX % 10
+ 18C8  52				PUSH DX   ;PUSHES DIGIT IN A STACK
+ 18C9  FF 06 0052 R			INC DIGITCOUNT1  ;COUNTS NO OF DIGITS IN A NUMBER
+ 18CD  83 F8 00				CMP AX,0
+ 18D0  75 EE				JNE PUSH_IN
+							
+ 18D2				POP_UP:
+ 18D2  83 3E 0052 R 00			CMP DIGITCOUNT1,0  ;STOPS WHEN EQUAL TO NO OF DIGITS
+ 18D7  74 0E				JE EXT
+ 18D9  FF 0E 0052 R			DEC DIGITCOUNT1
+ 18DD  5A				POP DX    ;POP FROM STACK ONE BY ONE
+ 18DE  83 C2 30				ADD DX,48
+ 18E1  B4 02				MOV AH,02H
+ 18E3  CD 21				INT 21H
+ 18E5  EB EB				JMP POP_UP
+						
+ 18E7				EXT:
+ 18E7  C3			RET
+ 18E8				PRI1 ENDP
+				;_
+ 18E8				SHOW_SCREEN1 PROC
+ 18E8  E8 EDFF			CALL new_window         ;correct
+ 18EB  E8 F388			CALL CLEAR
+ 18EE  E8 0010			CALL DECORATION
+ 18F1  E8 ED49			CALL welcome_messages	;correct
+ 18F4  E8 F37F			CALL CLEAR
+ 18F7  E8 F2DD			CALL GRID				;write this now
+ 18FA  E8 F379			CALL CLEAR
+ 18FD  E8 EDF1CALL DISPLAY_ARRAY
+ 1900  C3			ret 
+ 1901				SHOW_SCREEN1 ENDP
+
+ 1901				DECORATION PROC
+
+ 1901  B4 06			mov ah,06
+ 1903  B0 00			mov al,0
+ 1905  B5 07			mov ch,7
+ 1907  B1 12			mov cl,18
+ 1909  B6 1A			mov dh,26
+ 190B  B2 3A			mov dl,58
+ 190D  B7 00			mov bh,0
+ 190F  CD 10			int 10h
+
+ 1911  B4 06			mov ah,06
+ 1913  B0 00			mov al,0
+ 1915  B5 07			mov ch,7
+ 1917  B1 00			mov cl,0
+ 1919  B6 1A			mov dh,26
+ 191B  B2 11			mov dl,17
+ 191D  B7 02			mov bh,2
+ 191F  CD 10			int 10h
+
+ 1921  B4 06			mov ah,06
+ 1923  B0 00			mov al,0
+ 1925  B5 05			mov ch,5
+ 1927  B1 00			mov cl,0
+ 1929  B6 06			mov dh,6
+ 192B  B2 4F			mov dl,79
+ 192D  B7 04			mov bh,4
+ 192F  CD 10			int 10h
+
+ 1931  B4 06			mov ah,06
+ 1933  B0 00			mov al,0
+ 1935  B5 07			mov ch,7
+ 1937  B1 3B			mov cl,59
+ 1939  B6 1A			mov dh,26
+ 193B  B2 4F			mov dl,79
+ 193D  B7 02			mov bh,2
+ 193F  CD 10			int 10h
+
+ 1941  B4 06			mov ah,06
+ 1943  B0 00			mov al,0
+ 1945  B5 1B			mov ch,27
+ 1947  B1 00			mov cl,0
+ 1949  B6 1D			mov dh,29
+ 194B  B2 4F			mov dl,79
+ 194D  B7 04			mov bh,4
+ 194F  CD 10			int 10h
+
+ 1951  E8 F322			call CLEAR
+
+ 1954  B4 02			mov ah,02h
+ 1956  B6 06			mov dh,6
+ 1958  B2 10			mov dl,16
+ 195A  CD 10			int 10h
+
+
+ 195C  BA 00B3 R		mov dx,offset msg7
+ 195F  B3 02			mov bl,2
+ 1961  B4 09			mov ah,09
+ 1963  B0 00			mov al,0
+ 1965  CD 10			int 10h
+ 1967  CD 21			int 21h
+
+ 1969  B4 02			mov ah,02h
+ 196B  B6 1C			mov dh,28
+ 196D  B2 10			mov dl,16
+ 196F  CD 10			int 10h
+
+ 1971  BA 00E2 R		mov dx,offset msg8
+ 1974  B4 09			mov ah,09
+ 1976  CD 21			int 21h
+
+ 1978  E8 F2FB			CALL CLEAR
+
+ 197B  C3			RET
+ 197C				DECORATION ENDP
+
+ 197C				SHOW_SCREEN2 PROC
+ 197C  E8 ED6B			CALL new_window         ;correct
+ 197F  E8 F2F4			CALL CLEAR
+ 1982  E8 0314			CALL welcome_messages2	;correct
+ 1985  E8 F2EE			CALL CLEAR
+ 1988  E8 ED66			CALL DISPLAY_ARRAY
+ 198B  E8 001A			CALL DECORATION2
+ 198E  C3			ret 
+ 198F				SHOW_SCREEN2 ENDP
+
+ 198F				SHOW_SCREEN3 PROC
+ 198F  E8 ED58			CALL new_window         ;correct
+ 1992  E8 F2E1			CALL CLEAR
+ 1995  E8 08B2			CALL welcome_messages3	;correct
+ 1998  E8 F2DB			CALL CLEAR
+ 199B  E8 09A1			CALL DECORATION3
+ 199E  E8 F2D5			CALL CLEAR
+ 19A1  E8 F233			CALL GRID
+ 19A4  E8 ED4A			CALL DISPLAY_ARRAY
+
+ 19A7  C3			ret 
+ 19A8				SHOW_SCREEN3 ENDP
+
+ 19A8				DECORATION2 PROC
+ 19A8  B4 06			mov ah,6
+ 19AA  B0 00			mov al,0
+ 19AC  B5 07			mov ch,7
+ 19AE  B1 2B			mov cl,43       ;top right
+ 19B0  B6 0C			mov dh,12
+ 19B2  B2 3A			mov dl,58
+ 19B4  B7 09			mov bh,9
+ 19B6  CD 10			int 10h
+
+ 19B8  B4 06			mov ah,6
+ 19BA  B0 00			mov al,0
+ 19BC  B5 16			mov ch,22
+ 19BE  B1 0F			mov cl,15
+ 19C0  B6 1B			mov dh,27		;bottom left 
+ 19C2  B2 1D			mov dl,29
+ 19C4  B7 0E			mov bh,14
+ 19C6  CD 10			int 10h
+
+ 19C8  B4 06			mov ah,6
+ 19CA  B0 00			mov al,0
+ 19CC  B5 07			mov ch,7
+ 19CE  B1 0F			mov cl,15          ;top left
+ 19D0  B6 0C			mov dh,12
+ 19D2  B2 1D			mov dl,29
+ 19D4  B7 02			mov bh,2
+ 19D6  CD 10			int 10h
+
+ 19D8  B4 06			mov ah,6
+ 19DA  B0 00			mov al,0
+ 19DC  B5 16			mov ch,22
+ 19DE  B1 2B			mov cl,43     				;bottom right
+ 19E0  B6 1B			mov dh,27
+ 19E2  B2 3A			mov dl,58
+ 19E4  B7 04			mov bh,4
+ 19E6  CD 10			int 10h
+
+ 19E8  B4 06			mov ah,6
+ 19EA  B0 00			mov al,0
+ 19EC  B5 10			mov ch,16
+ 19EE  B1 1F			mov cl,31					;centre
+ 19F0  B6 12			mov dh,18
+ 19F2  B2 29			mov dl,41
+ 19F4  B7 02			mov bh,2
+ 19F6  CD 10			int 10h
+
+ 19F8  B4 06			mov ah,6
+ 19FA  B0 00			mov al,0
+ 19FC  B5 0D			mov ch,13
+ 19FE  B1 37			mov cl,55
+ 1A00  B6 14			mov dh,20
+ 1A02  B2 3A			mov dl,58    				;line
+ 1A04  B7 00			mov bh,0
+ 1A06  CD 10			int 10h
+
+ 1A08  B4 06			mov ah,6
+ 1A0A  B0 00			mov al,0
+ 1A0C  B5 05			mov ch,5
+ 1A0E  B1 3F			mov cl,63
+ 1A10  B6 05			mov dh,5
+ 1A12  B2 4D			mov dl,77    				
+ 1A14  B7 05			mov bh,5
+ 1A16  CD 10			int 10h
+
+ 1A18  B4 06			mov ah,6
+ 1A1A  B0 00			mov al,0
+ 1A1C  B5 1D			mov ch,29
+ 1A1E  B1 3F			mov cl,63
+ 1A20  B6 1D			mov dh,29
+ 1A22  B2 4D			mov dl,77    				
+ 1A24  B7 05			mov bh,5
+ 1A26  CD 10			int 10h
+
+ 1A28  B4 06			mov ah,6
+ 1A2A  B0 00			mov al,0
+ 1A2C  B5 07			mov ch,7
+ 1A2E  B1 3F			mov cl,63
+ 1A30  B6 0C			mov dh,12
+ 1A32  B2 4D			mov dl,77    				
+ 1A34  B7 0F			mov bh,15
+ 1A36  CD 10			int 10h
+
+ 1A38  B4 06			mov ah,6
+ 1A3A  B0 00			mov al,0
+ 1A3C  B5 0E			mov ch,14
+ 1A3E  B1 3F			mov cl,63
+ 1A40  B6 14			mov dh,20
+ 1A42  B2 4D			mov dl,77    				
+ 1A44  B7 0E			mov bh,14
+ 1A46  CD 10			int 10h
+
+ 1A48  B4 06			mov ah,6
+ 1A4A  B0 00			mov al,0
+ 1A4C  B5 16			mov ch,22
+ 1A4E  B1 3F			mov cl,63
+ 1A50  B6 1B			mov dh,27
+ 1A52  B2 4D			mov dl,77    				
+ 1A54  B7 0D			mov bh,13
+ 1A56  CD 10			int 10h
+
+ 1A58  B4 06			mov ah,6
+ 1A5A  B0 00			mov al,0
+ 1A5C  B5 05			mov ch,5
+ 1A5E  B1 01			mov cl,1
+ 1A60  B6 05			mov dh,5
+ 1A62  B2 0A			mov dl,10    				
+ 1A64  B7 04			mov bh,4
+ 1A66  CD 10			int 10h
+
+ 1A68  B4 06			mov ah,6
+ 1A6A  B0 00			mov al,0
+ 1A6C  B5 1D			mov ch,29
+ 1A6E  B1 01			mov cl,1
+ 1A70  B6 1D			mov dh,29
+ 1A72  B2 0A			mov dl,10    				
+ 1A74  B7 04			mov bh,4
+ 1A76  CD 10			int 10h
+
+ 1A78  B4 06			mov ah,6
+ 1A7A  B0 00			mov al,0
+ 1A7C  B5 07			mov ch,7
+ 1A7E  B1 01			mov cl,1
+ 1A80  B6 1B			mov dh,27
+ 1A82  B2 0A			mov dl,10    				
+ 1A84  B7 0F			mov bh,15
+ 1A86  CD 10			int 10h
+				;***************************************************border lines*******************************************************
+ 1A88  B4 06			mov ah,6
+ 1A8A  B0 00			mov al,0
+ 1A8C  B5 06			mov ch,6
+ 1A8E  B1 0C			mov cl,12
+ 1A90  B6 1C			mov dh,28
+ 1A92  B2 0D			mov dl,13   				;line
+ 1A94  B7 02			mov bh,2
+ 1A96  CD 10			int 10h
+
+ 1A98  B4 06			mov ah,6
+ 1A9A  B0 00			mov al,0
+ 1A9C  B5 05			mov ch,5
+ 1A9E  B1 0C			mov cl,12
+ 1AA0  B6 05			mov dh,5
+ 1AA2  B2 3D			mov dl,61   				;line
+ 1AA4  B7 02			mov bh,2
+ 1AA6  CD 10			int 10h
+
+ 1AA8  B4 06			mov ah,6
+ 1AAA  B0 00			mov al,0
+ 1AAC  B5 06			mov ch,6
+ 1AAE  B1 3C			mov cl,60
+ 1AB0  B6 1C			mov dh,28
+ 1AB2  B2 3D			mov dl,61   				;line
+ 1AB4  B7 02			mov bh,2
+ 1AB6  CD 10			int 10h
+
+ 1AB8  B4 06			mov ah,6
+ 1ABA  B0 00			mov al,0
+ 1ABC  B5 1D			mov ch,29
+ 1ABE  B1 0C			mov cl,12
+ 1AC0  B6 1D			mov dh,29
+ 1AC2  B2 3D			mov dl,61   				;line
+ 1AC4  B7 02			mov bh,2
+ 1AC6  CD 10			int 10h
+
+ 1AC8  B4 06			mov ah,6
+ 1ACA  B0 00			mov al,0
+ 1ACC  B5 0E			mov ch,14
+ 1ACE  B1 07			mov cl,7
+ 1AD0  B6 0E			mov dh,14
+ 1AD2  B2 08			mov dl,8   				
+ 1AD4  B7 00			mov bh,0
+ 1AD6  CD 10			int 10h
+
+ 1AD8  B4 06			mov ah,6
+ 1ADA  B0 00			mov al,0
+ 1ADC  B5 0E			mov ch,14
+ 1ADE  B1 03			mov cl,3
+ 1AE0  B6 0E			mov dh,14
+ 1AE2  B2 04			mov dl,4   				
+ 1AE4  B7 00			mov bh,0
+ 1AE6  CD 10			int 10h
+
+ 1AE8  B4 06			mov ah,6
+ 1AEA  B0 00			mov al,0
+ 1AEC  B5 13			mov ch,19
+ 1AEE  B1 02			mov cl,2
+ 1AF0  B6 13			mov dh,19
+ 1AF2  B2 08			mov dl,8   				
+ 1AF4  B7 00			mov bh,0
+ 1AF6  CD 10			int 10h
+
+ 1AF8  B4 06			mov ah,6
+ 1AFA  B0 00			mov al,0
+ 1AFC  B5 12			mov ch,18
+ 1AFE  B1 02			mov cl,2
+ 1B00  B6 13			mov dh,19
+ 1B02  B2 03			mov dl,3   				
+ 1B04  B7 00			mov bh,0
+ 1B06  CD 10			int 10h
+
+ 1B08  B4 06			mov ah,6
+ 1B0A  B0 00			mov al,0
+ 1B0C  B5 12			mov ch,18
+ 1B0E  B1 08			mov cl,8
+ 1B10  B6 13			mov dh,19
+ 1B12  B2 09			mov dl,9   				
+ 1B14  B7 00			mov bh,0
+ 1B16  CD 10			int 10h
+
+ 1B18  E8 F15B			CALL CLEAR
+ 1B1B  B4 02			mov ah,02h
+ 1B1D  B6 08			mov dh,8
+ 1B1F  B2 14			mov dl,20
+ 1B21  CD 10			int 10h
+
+ 1B23  BA 0118 R		mov dx,offset msg10
+ 1B26  B3 02			mov bl,2
+ 1B28  B4 09			mov ah,09
+ 1B2A  B0 00			mov al,0
+ 1B2C  CD 10			int 10h
+ 1B2E  CD 21			int 21h
+
+ 1B30  E8 F143			CALL CLEAR
+ 1B33  B4 02			mov ah,02h
+ 1B35  B6 09			mov dh,9
+ 1B37  B2 14			mov dl,20
+ 1B39  CD 10			int 10h
+
+ 1B3B  BA 011D R		mov dx,offset msg11
+ 1B3E  B3 02			mov bl,2
+ 1B40  B4 09			mov ah,09
+ 1B42  B0 00			mov al,0
+ 1B44  CD 10			int 10h
+ 1B46  CD 21			int 21h
+
+ 1B48  E8 F12B			CALL CLEAR
+ 1B4B  B4 02			mov ah,02h
+ 1B4D  B6 0B			mov dh,11
+ 1B4F  B2 14			mov dl,20
+ 1B51  CD 10			int 10h
+
+ 1B53  BA 0122 R		mov dx,offset msg12
+ 1B56  B3 02			mov bl,2
+ 1B58  B4 09			mov ah,09
+ 1B5A  B0 00			mov al,0
+ 1B5C  CD 10			int 10h
+ 1B5E  CD 21			int 21h
+
+ 1B60  E8 F113			CALL CLEAR
+ 1B63  B4 02			mov ah,02h
+ 1B65  B6 08			mov dh,8
+ 1B67  B2 31			mov dl,49
+ 1B69  CD 10			int 10h
+
+ 1B6B  BA 0126 R		mov dx,offset msg13
+ 1B6E  B3 02			mov bl,2
+ 1B70  B4 09			mov ah,09
+ 1B72  B0 00			mov al,0
+ 1B74  CD 10			int 10h
+ 1B76  CD 21			int 21h
+
+ 1B78  E8 F0FB			CALL CLEAR
+ 1B7B  B4 02			mov ah,02h
+ 1B7D  B6 09			mov dh,9
+ 1B7F  B2 31			mov dl,49
+ 1B81  CD 10			int 10h
+
+ 1B83  BA 012B R		mov dx,offset msg14
+ 1B86  B3 02			mov bl,2
+ 1B88  B4 09			mov ah,09
+ 1B8A  B0 00			mov al,0
+ 1B8C  CD 10			int 10h
+ 1B8E  CD 21			int 21h
+
+ 1B90  E8 F0E3			CALL CLEAR
+ 1B93  B4 02			mov ah,02h
+ 1B95  B6 0B			mov dh,11
+ 1B97  B2 31			mov dl,49
+ 1B99  CD 10			int 10h
+
+ 1B9B  BA 012F R		mov dx,offset msg15
+ 1B9E  B3 02			mov bl,2
+ 1BA0  B4 09			mov ah,09
+ 1BA2  B0 00			mov al,0
+ 1BA4  CD 10			int 10h
+ 1BA6  CD 21			int 21h
+
+ 1BA8  E8 F0CB			CALL CLEAR
+ 1BAB  B4 02			mov ah,02h
+ 1BAD  B6 19			mov dh,25
+ 1BAF  B2 12			mov dl,18
+ 1BB1  CD 10			int 10h
+
+ 1BB3  BA 0133 R		mov dx,offset msg16
+ 1BB6  B3 02			mov bl,2
+ 1BB8  B4 09			mov ah,09
+ 1BBA  B0 00			mov al,0
+ 1BBC  CD 10			int 10h
+ 1BBE  CD 21			int 21h
+
+ 1BC0  E8 F0B3			CALL CLEAR
+ 1BC3  B4 02			mov ah,02h
+ 1BC5  B6 18			mov dh,24
+ 1BC7  B2 31			mov dl,49
+ 1BC9  CD 10			int 10h
+
+
+ 1BCB  BA 013D R		mov dx,offset msg17
+ 1BCE  B3 02			mov bl,2
+ 1BD0  B4 09			mov ah,09
+ 1BD2  B0 00			mov al,0
+ 1BD4  CD 10			int 10h
+ 1BD6  CD 21			int 21h
+
+ 1BD8  E8 F09B			CALL CLEAR
+ 1BDB  B4 02			mov ah,02h
+ 1BDD  B6 19			mov dh,25
+ 1BDF  B2 31			mov dl,49
+ 1BE1  CD 10			int 10h
+
+ 1BE3  BA 0142 R		mov dx,offset msg18
+ 1BE6  B3 02			mov bl,2
+ 1BE8  B4 09			mov ah,09
+ 1BEA  B0 00			mov al,0
+ 1BEC  CD 10			int 10h
+ 1BEE  CD 21			int 21h
+
+ 1BF0  E8 F083			CALL CLEAR
+ 1BF3  B4 02			mov ah,02h
+ 1BF5  B6 09			mov dh,9
+ 1BF7  B2 42			mov dl,66
+ 1BF9  CD 10			int 10h
+
+ 1BFB  BA 014A R		mov dx,offset msg19
+ 1BFE  B3 02			mov bl,2
+ 1C00  B4 09			mov ah,09
+ 1C02  B0 00			mov al,0
+ 1C04  CD 10			int 10h
+ 1C06  CD 21			int 21h
+
+ 1C08  E8 F06B			CALL CLEAR
+ 1C0B  B4 02			mov ah,02h
+ 1C0D  B6 0A			mov dh,10
+ 1C0F  B2 44			mov dl,68
+ 1C11  CD 10			int 10h
+
+ 1C13  BA 0154 R		mov dx,offset msg20
+ 1C16  B3 02			mov bl,2
+ 1C18  B4 09			mov ah,09
+ 1C1A  B0 00			mov al,0
+ 1C1C  CD 10			int 10h
+ 1C1E  CD 21			int 21h
+
+ 1C20  E8 F053			CALL CLEAR
+ 1C23  B4 02			mov ah,02h
+ 1C25  B6 10			mov dh,16
+ 1C27  B2 42			mov dl,66
+ 1C29  CD 10			int 10h
+
+ 1C2B  BA 0159 R		mov dx,offset msg21
+ 1C2E  B3 02			mov bl,2
+ 1C30  B4 09			mov ah,09
+ 1C32  B0 00			mov al,0
+ 1C34  CD 10			int 10h
+ 1C36  CD 21			int 21h
+
+ 1C38  E8 F03B			CALL CLEAR
+ 1C3B  B4 02			mov ah,02h
+ 1C3D  B6 11			mov dh,17
+ 1C3F  B2 44			mov dl,68
+ 1C41  CD 10			int 10h
+
+ 1C43  BA 0162 R		mov dx,offset msg22
+ 1C46  B3 02			mov bl,2
+ 1C48  B4 09			mov ah,09
+ 1C4A  B0 00			mov al,0
+ 1C4C  CD 10			int 10h
+ 1C4E  CD 21			int 21h
+
+ 1C50  E8 F023			CALL CLEAR
+ 1C53  B4 02			mov ah,02h
+ 1C55  B6 17			mov dh,23
+ 1C57  B2 41			mov dl,65
+ 1C59  CD 10			int 10h
+
+ 1C5B  BA 0167 R		mov dx,offset msg23
+ 1C5E  B3 02			mov bl,2
+ 1C60  B4 09			mov ah,09
+ 1C62  B0 00			mov al,0
+ 1C64  CD 10			int 10h
+ 1C66  CD 21			int 21h
+
+ 1C68  E8 F00B			CALL CLEAR
+ 1C6B  B4 02			mov ah,02h
+ 1C6D  B6 18			mov dh,24
+ 1C6F  B2 44			mov dl,68
+ 1C71  CD 10			int 10h
+
+ 1C73  BA 0174 R		mov dx,offset msg24
+ 1C76  B3 02			mov bl,2
+ 1C78  B4 09			mov ah,09
+ 1C7A  B0 00			mov al,0
+ 1C7C  CD 10			int 10h
+ 1C7E  CD 21			int 21h
+
+ 1C80  E8 EFF3			CALL CLEAR
+ 1C83  B4 02			mov ah,02h
+ 1C85  B6 19			mov dh,25
+ 1C87  B2 43			mov dl,67
+ 1C89  CD 10			int 10h
+
+ 1C8B  BA 017B R		mov dx,offset msg25
+ 1C8E  B3 02			mov bl,2
+ 1C90  B4 09			mov ah,09
+ 1C92  B0 00			mov al,0
+ 1C94  CD 10			int 10h
+ 1C96  CD 21			int 21h
+
+ 1C98  C3			RET
+ 1C99				DECORATION2 ENDP
+
+ 1C99				welcome_messages2 proc
+
+ 1C99  B4 02			mov ah,02h
+ 1C9B  B6 00			mov dh,0
+ 1C9D  B2 00			mov dl,0
+ 1C9F  CD 10			int 10h
+
+ 1CA1  B4 09			mov ah,09
+ 1CA3  BA 0066 R		mov dx,offset msg3
+ 1CA6  CD 21			int 21h
+
+ 1CA8  B4 09			mov ah,09
+ 1CAA  BA 0641 R		mov dx,offset username
+ 1CAD  CD 21			int 21h
+
+ 1CAF  B4 02			mov ah,02h
+ 1CB1  B6 02			mov dh,2
+ 1CB3  B2 00			mov dl,0
+ 1CB5  CD 10			int 10h
+
+ 1CB7  B4 09			mov ah,09
+ 1CB9  BA 006E R		mov dx,offset msg4
+ 1CBC  CD 21			int 21h
+
+ 1CBE  A1 004A R		MOV AX, MOVES
+ 1CC1  A3 004C R		MOV MOVESPRINT, AX
+ 1CC4  E8 FBAD			CALL PRI
+
+
+ 1CC7  B4 02			mov ah,02h
+ 1CC9  B6 00			mov dh,0
+ 1CCB  B2 1E			mov dl,30
+ 1CCD  CD 10			int 10h
+ 1CCF  BA 010F R		mov dx,offset msg9
+ 1CD2  B4 09			mov ah,09
+ 1CD4  CD 21			int 21h
+
+
+ 1CD6  B4 02			mov ah,02h
+ 1CD8  B6 00			mov dh,0
+ 1CDA  B2 3C			mov dl,60
+ 1CDC  CD 10			int 10h
+ 1CDE  BA 005D R		mov dx,offset msg2
+ 1CE1  B4 09			mov ah,09
+ 1CE3  CD 21			int 21h
+
+ 1CE5  B8 0000			MOV AX, 0
+ 1CE8  A1 0048 R		mov ax, SCORE
+ 1CEB  A3 0050 R		mov SCOREPRINT,AX
+ 1CEE  E8 FBBD			call PRI1
+
+ 1CF1  B4 06			mov ah,6
+ 1CF3  B0 00			mov al,0
+ 1CF5  B5 01			mov ch,1
+ 1CF7  B1 00			mov cl,0
+ 1CF9  B6 01			mov dh,1
+ 1CFB  B2 0F			mov dl,15
+ 1CFD  B7 03			mov bh,3
+ 1CFF  CD 10			int 10h
+
+ 1D01  B4 06			mov ah,6
+ 1D03  B0 00			mov al,0
+ 1D05  B5 01			mov ch,1
+ 1D07  B1 1B			mov cl,27
+ 1D09  B6 01			mov dh,1
+ 1D0B  B2 26			mov dl,38
+ 1D0D  B7 04			mov bh,4
+ 1D0F  CD 10			int 10h
+
+ 1D11  B4 06			mov ah,6
+ 1D13  B0 00			mov al,0
+ 1D15  B5 01			mov ch,1
+ 1D17  B1 3A			mov cl,58
+ 1D19  B6 01			mov dh,1
+ 1D1B  B2 49			mov dl,73
+ 1D1D  B7 02			mov bh,2
+ 1D1F  CD 10			int 10h
+
+ 1D21  B4 06			mov ah,6
+ 1D23  B0 00			mov al,0
+ 1D25  B5 03			mov ch,3
+ 1D27  B1 00			mov cl,0
+ 1D29  B6 03			mov dh,3
+ 1D2B  B2 14			mov dl,20
+ 1D2D  B7 09			mov bh,9
+ 1D2F  CD 10			int 10h
+
+ 1D31  B8 0000			mov ax,0
+ 1D34  BB 0000			mov bx,0
+ 1D37  B9 0000			mov cx,0
+ 1D3A  BA 0000			mov dx,0
+
+ 1D3D  B4 02			mov ah,02h
+ 1D3F  B6 1C			mov dh,28
+ 1D41  B2 1C			mov dl,28
+ 1D43  CD 10			int 10h
+ 1D45  C3			ret
+ 1D46				welcome_messages2 endp
+ 1D46				horizontal_crushing2 proc
+ 1D46  C6 06 0026 R 00		MOV var24,0
+ 1D4B  C7 06 0030 R 0003	MOV index3,3
+
+ 1D51				loopfor:
+ 1D51  E8 EF22			CALL CLEAR
+ 1D54  8B 36 0030 R		mov si,index3
+ 1D58  8A A4 064B R		mov ah,myarray[si]
+ 1D5C  46			inc si
+ 1D5D  8A 84 064B R		mov al,myarray[si]
+ 1D61  38 E0			cmp al,ah
+ 1D63  74 02			je checkforthird
+ 1D65  EB 1C			jmp gonextline
+ 1D67				checkforthird:
+ 1D67  46			inc si
+ 1D68  8A 9C 064B R		mov bl,myarray[si]
+ 1D6C  38 D8			cmp al,bl
+ 1D6E  74 02			je crushthem
+ 1D70  EB 11			jmp gonextline
+ 1D72				crushthem:
+ 1D72  C6 84 064B R 2F		mov myarray[si],'/'
+ 1D77  4E			dec si
+ 1D78  C6 84 064B R 2F		mov myarray[si],'/'
+ 1D7D  4E			dec si
+ 1D7E  C6 84 064B R 2F		mov myarray[si],'/'
+
+ 1D83				gonextline:
+ 1D83  83 06 0030 R 0A		add index3,10
+ 1D88  FE 06 0026 R		inc var24
+ 1D8C  80 3E 0026 R 03		cmp var24,3
+ 1D91  74 02			je line4
+ 1D93  EB BC			jmp loopfor
+
+ 1D95				line4:
+ 1D95  FE 06 0027 R		inc var25
+ 1D99  80 3E 0027 R 02		cmp var25,2
+ 1D9E  74 08			je endthis
+ 1DA0  EB AF			jmp loopfor
+ 1DA2  C7 06 0030 R 0049	mov index3,73
+
+ 1DA8				endthis:
+ 1DA8  C6 06 0027 R 00		mov var25,0
+ 1DAD  C7 06 0030 R 001E	mov index3,30
+ 1DB3				horizontal_outer_iterationinline4and7:
+ 1DB3  8B 36 0030 R		mov si,index3
+ 1DB7  C6 06 0026 R 00		mov var24,0
+ 1DBC				lccinline4and7:
+ 1DBC  8A 84 064B R		mov al,myarray[si]
+ 1DC0  46			inc si
+ 1DC1  8A 9C 064B R		mov bl,myarray[si]
+ 1DC5  38 D8			cmp al,bl
+ 1DC7  74 02			je checkforthirdinline4andline7
+ 1DC9  EB 36			jmp horizontal_next_go
+
+ 1DCB				checkforthirdinline4andline7:
+ 1DCB  46			inc si
+ 1DCC  8A 8C 064B R		mov cl,myarray[si]
+ 1DD0  38 CB			cmp bl,cl
+ 1DD2  74 03			je horizontal_crush_theminline4andline7
+ 1DD4  4E			dec si
+ 1DD5  EB 2A			jmp horizontal_next_go
+
+ 1DD7				horizontal_crush_theminline4andline7:
+
+ 1DD7				check_horizontal_fourthinline4and7:
+ 1DD7  46			inc si
+ 1DD8  8A AC 064B R		mov ch,myarray[si]
+ 1DDC  38 CD			cmp ch,cl
+ 1DDE  74 03			je crush_horizontal_fourinline4and7
+ 1DE0  4E			dec si
+ 1DE1  EB 06			jmp crush_horizontal_threeinline4and7
+ 1DE3				crush_horizontal_fourinline4and7:
+ 1DE3  C6 84 064B R 12		mov myarray[si],18
+ 1DE8  4E			dec si
+ 1DE9				crush_horizontal_threeinline4and7:
+ 1DE9  C6 84 064B R 2F		mov myarray[si],'/'
+ 1DEE  4E			dec si
+ 1DEF  C6 84 064B R 2F		mov myarray[si],'/'
+ 1DF4  4E			dec si
+ 1DF5  C6 84 064B R 2F		mov myarray[si],'/'
+ 1DFA  46			inc si
+ 1DFB  46			inc si
+ 1DFC  83 06 0048 R 01		ADD SCORE,1
+
+ 1E01				horizontal_next_go:
+ 1E01  FE 06 0026 R		inc var24
+ 1E05  80 3E 0026 R 06		cmp var24,6
+ 1E0A  74 02			je lddinline4and7
+ 1E0C  EB AE			jmp lccinline4and7
+
+ 1E0E				lddinline4and7:
+ 1E0E  C7 06 0030 R 003C	MOV index3,60
+ 1E14  C6 06 0026 R 00		mov var24,0
+ 1E19  FE 06 0027 R		inc var25
+ 1E1D  80 3E 0027 R 02		cmp var25,2
+ 1E22  74 02			je hardcode
+ 1E24  EB 8D			jmp horizontal_outer_iterationinline4and7
+
+
+
+ 1E26				hardcode:
+ 1E26  E8 EE4D			CALL CLEAR
+ 1E29  8A 26 0673 R		mov ah,myarray[40]
+ 1E2D  A0 0674 R		mov al,myarray[41]
+ 1E30  38 C4			cmp ah,al
+ 1E32  74 02			je check42
+ 1E34  EB 17			jmp goto46 
+ 1E36				check42:
+ 1E36  8A 1E 0675 R		mov bl,myarray[42]
+ 1E3A  74 02			je crush40till42
+ 1E3C  EB 0F			jmp goto46
+ 1E3E				crush40till42:
+ 1E3E  C6 06 0673 R 2F		mov myarray[40],'/'
+ 1E43  C6 06 0674 R 2F		mov myarray[41],'/'
+ 1E48  C6 06 0675 R 2F		mov myarray[42],'/'
+
+ 1E4D				goto46:
+ 1E4D  8A 26 0679 R		mov ah,myarray[46]
+ 1E51  A0 067A R		mov al,myarray[47]
+ 1E54  38 C4			cmp ah,al
+ 1E56  74 02			je check48
+ 1E58  EB 17			jmp goto50
+ 1E5A				check48:
+ 1E5A  8A 1E 067B R		mov bl,myarray[48]
+ 1E5E  74 02			je crush46till48
+ 1E60  EB 0F			jmp goto50
+ 1E62				crush46till48:
+ 1E62  C6 06 0679 R 2F		mov myarray[46],'/'
+ 1E67  C6 06 067A R 2F		mov myarray[47],'/'
+ 1E6C  C6 06 067B R 2F		mov myarray[48],'/'
+
+ 1E71				goto50:
+ 1E71  8A 26 067D R		mov ah,myarray[50]
+ 1E75  A0 067E R		mov al,myarray[51]
+ 1E78  38 C4			cmp ah,al
+ 1E7A  74 02			je check52
+ 1E7C  EB 17			jmp goto56
+ 1E7E				check52:
+ 1E7E  8A 1E 067F R		mov bl,myarray[52]
+ 1E82  74 02			je crush50till52
+ 1E84  EB 0F			jmp goto56
+ 1E86				crush50till52:
+ 1E86  C6 06 067D R 2F		mov myarray[50],'/'
+ 1E8B  C6 06 067E R 2F		mov myarray[51],'/'
+ 1E90  C6 06 067F R 2F		mov myarray[52],'/'
+
+ 1E95				goto56:
+ 1E95  8A 26 0683 R		mov ah,myarray[56]
+ 1E99  A0 0684 R		mov al,myarray[57]
+ 1E9C  38 C4			cmp ah,al
+ 1E9E  74 02			je check58
+ 1EA0  EB 17			jmp endthishorizontal2
+ 1EA2				check58:
+ 1EA2  8A 1E 0685 R		mov bl,myarray[58]
+ 1EA6  74 02			je crush56till58
+ 1EA8  EB 0F			jmp endthishorizontal2
+ 1EAA				crush56till58:
+ 1EAA  C6 06 0683 R 2F		mov myarray[56],'/'
+ 1EAF  C6 06 0684 R 2F		mov myarray[57],'/'
+ 1EB4  C6 06 0685 R 2F		mov myarray[58],'/'
+
+ 1EB9				endthishorizontal2:
+ 1EB9  C3			ret
+ 1EBA				horizontal_crushing2 endp
+
+ 1EBA				vertical_crushing2 proc
+ 1EBA  B8 0000			mov ax,0
+ 1EBD  BB 0000			mov bx,0
+ 1EC0  B9 0000			mov cx,0
+ 1EC3  BA 0000			mov dx,0
+ 1EC6  C7 06 002C R 001E	mov index1,30
+ 1ECC  C6 06 001A R 00		mov var12,0
+ 1ED1  C6 06 0019 R 00		mov var11,0
+
+ 1ED6				vertical_outer_iteration2:
+ 1ED6  8B 36 002C R		mov si,index1
+ 1EDA  C6 06 0019 R 00		mov var11,0
+ 1EDF				lff2:
+ 1EDF  8A 84 064B R		mov al,myarray[si]
+ 1EE3  83 06 002C R 0A		add index1,10
+ 1EE8  8B 36 002C R		mov si,index1
+ 1EEC  8A 9C 064B R		mov bl,myarray[si]
+ 1EF0  38 D8			cmp al,bl
+ 1EF2  74 02			je vertical_check_third2
+ 1EF4  EB 7C			jmp vertical_next_step2
+
+ 1EF6				vertical_check_third2:
+ 1EF6  83 06 002C R 0A		add index1,10
+ 1EFB  8B 36 002C R		mov si,index1
+ 1EFF  8A 8C 064B R		mov cl,myarray[si]
+ 1F03  80 BC 064B R 2F		cmp myarray[si],'/'
+ 1F08  74 68			je vertical_next_step2
+ 1F0A  38 CB			cmp bl,cl
+ 1F0C  74 0B			je vertical_crush_them2
+ 1F0E  83 2E 002C R 0A		sub index1,10
+ 1F13  8B 36 002C R		mov si,index1
+ 1F17  EB 59			jmp vertical_next_step2
+
+ 1F19				vertical_crush_them2:
+ 1F19				check_vertical_fourth2:
+ 1F19  83 06 002C R 0A		add index1,10
+ 1F1E  8B 36 002C R		mov si,index1
+ 1F22  8A AC 064B R		mov ch,myarray[si]
+ 1F26  38 CD			cmp ch,cl
+ 1F28  74 0B			je crush_vertical_four2
+ 1F2A  83 2E 002C R 0A		sub index1,10
+ 1F2F  8B 36 002C R		mov si,index1
+ 1F33  EB 0E			jmp crush_vertical_three2
+
+ 1F35				crush_vertical_four2:
+ 1F35  C6 84 064B R 12		mov myarray[si],18
+ 1F3A  83 2E 002C R 0A		sub index1,10
+ 1F3F  8B 36 002C R		mov si,index1
+
+ 1F43				crush_vertical_three2:
+ 1F43  C6 84 064B R 2F		mov myarray[si],'/'
+ 1F48  83 2E 002C R 0A		sub index1,10
+ 1F4D  8B 36 002C R		mov si,index1
+ 1F51  C6 84 064B R 2F		mov myarray[si],'/'
+ 1F56  83 2E 002C R 0A		sub index1,10
+ 1F5B  8B 36 002C R		mov si,index1
+ 1F5F  C6 84 064B R 2F		mov myarray[si],'/'
+ 1F64  83 06 002C R 14		add index1,20
+ 1F69  8B 36 002C R		mov si,index1
+ 1F6D  83 06 0048 R 06		ADD SCORE,6
+
+ 1F72				vertical_next_step2:
+ 1F72  FE 06 0019 R		inc var11
+ 1F76  80 3E 0019 R 02		cmp var11,2
+ 1F7B  74 03			je lgg2
+ 1F7D  E9 FF5F			jmp lff2
+
+ 1F80				lgg2:
+ 1F80  C6 06 0019 R 00		mov var11,0
+ 1F85  C7 06 002C R 001E	mov index1,30
+ 1F8B  FE 06 001A R		inc var12
+ 1F8F  A1 002C R		mov ax,index1
+ 1F92  02 06 001A R		add al,var12
+ 1F96  A3 002C R		mov index1,ax
+
+ 1F99  80 3E 001A R 03		cmp var12,3
+ 1F9E  74 03			je lhh2
+ 1FA0  E9 FF33			jmp vertical_outer_iteration2
+
+ 1FA3				lhh2:
+
+ 1FA3  B8 0000			mov ax,0
+ 1FA6  BB 0000			mov bx,0
+ 1FA9  B9 0000			mov cx,0
+ 1FAC  BA 0000			mov dx,0
+ 1FAF  C7 06 002C R 0024	mov index1,36
+ 1FB5  C6 06 001A R 00		mov var12,0
+ 1FBA  C6 06 0019 R 00		mov var11,0
+
+ 1FBF				vertical_outer_iteration3:
+ 1FBF  8B 36 002C R		mov si,index1
+ 1FC3  C6 06 0019 R 00		mov var11,0
+ 1FC8				lff3:
+ 1FC8  8A 84 064B R		mov al,myarray[si]
+ 1FCC  83 06 002C R 0A		add index1,10
+ 1FD1  8B 36 002C R		mov si,index1
+ 1FD5  8A 9C 064B R		mov bl,myarray[si]
+ 1FD9  38 D8			cmp al,bl
+ 1FDB  74 02			je vertical_check_third3
+ 1FDD  EB 75			jmp vertical_next_step3
+
+ 1FDF				vertical_check_third3:
+ 1FDF  83 06 002C R 0A		add index1,10
+ 1FE4  8B 36 002C R		mov si,index1
+ 1FE8  8A 8C 064B R		mov cl,myarray[si]
+ 1FEC  38 CB			cmp bl,cl
+ 1FEE  74 0B			je vertical_crush_them3
+ 1FF0  83 2E 002C R 0A		sub index1,10
+ 1FF5  8B 36 002C R		mov si,index1
+ 1FF9  EB 59			jmp vertical_next_step3
+
+ 1FFB				vertical_crush_them3:
+ 1FFB				check_vertical_fourth3:
+ 1FFB  83 06 002C R 0A		add index1,10
+ 2000  8B 36 002C R		mov si,index1
+ 2004  8A AC 064B R		mov ch,myarray[si]
+ 2008  38 CD			cmp ch,cl
+ 200A  74 0B			je crush_vertical_four3
+ 200C  83 2E 002C R 0A		sub index1,10
+ 2011  8B 36 002C R		mov si,index1
+ 2015  EB 0E			jmp crush_vertical_three3
+
+ 2017				crush_vertical_four3:
+ 2017  C6 84 064B R 12		mov myarray[si],18
+ 201C  83 2E 002C R 0A		sub index1,10
+ 2021  8B 36 002C R		mov si,index1
+
+ 2025				crush_vertical_three3:
+ 2025  C6 84 064B R 2F		mov myarray[si],'/'
+ 202A  83 2E 002C R 0A		sub index1,10
+ 202F  8B 36 002C R		mov si,index1
+ 2033  C6 84 064B R 2F		mov myarray[si],'/'
+ 2038  83 2E 002C R 0A		sub index1,10
+ 203D  8B 36 002C R		mov si,index1
+ 2041  C6 84 064B R 2F		mov myarray[si],'/'
+ 2046  83 06 002C R 14		add index1,20
+ 204B  8B 36 002C R		mov si,index1
+ 204F  83 06 0048 R 01		ADD SCORE,1
+
+ 2054				vertical_next_step3:
+ 2054  FE 06 0019 R		inc var11
+ 2058  80 3E 0019 R 02		cmp var11,2
+ 205D  74 03			je lgg3
+ 205F  E9 FF66			jmp lff3
+
+ 2062				lgg3:
+ 2062  C6 06 0019 R 00		mov var11,0
+ 2067  C7 06 002C R 0024	mov index1,36
+ 206D  FE 06 001A R		inc var12
+ 2071  A1 002C R		mov ax,index1
+ 2074  02 06 001A R		add al,var12
+ 2078  A3 002C R		mov index1,ax
+
+ 207B  80 3E 001A R 03		cmp var12,3
+ 2080  74 03			je lhh3
+ 2082  E9 FF3A			jmp vertical_outer_iteration3
+
+ 2085				lhh3:
+
+ 2085  B8 0000			mov ax,0
+ 2088  BB 0000			mov bx,0
+ 208B  B9 0000			mov cx,0
+ 208E  BA 0000			mov dx,0
+ 2091  C7 06 002C R 0003	mov index1,03
+ 2097  C6 06 001A R 00		mov var12,0
+ 209C  C6 06 0019 R 00		mov var11,0
+
+ 20A1				vertical_outer_iteration4:
+ 20A1  8B 36 002C R		mov si,index1
+ 20A5  C6 06 0019 R 00		mov var11,0
+ 20AA				lff4:
+ 20AA  8A 84 064B R		mov al,myarray[si]
+ 20AE  83 06 002C R 0A		add index1,10
+ 20B3  8B 36 002C R		mov si,index1
+ 20B7  8A 9C 064B R		mov bl,myarray[si]
+ 20BB  38 D8			cmp al,bl
+ 20BD  74 02			je vertical_check_third4
+ 20BF  EB 75			jmp vertical_next_step4
+
+ 20C1				vertical_check_third4:
+ 20C1  83 06 002C R 0A		add index1,10
+ 20C6  8B 36 002C R		mov si,index1
+ 20CA  8A 8C 064B R		mov cl,myarray[si]
+ 20CE  38 CB			cmp bl,cl
+ 20D0  74 0B			je vertical_crush_them4
+ 20D2  83 2E 002C R 0A		sub index1,10
+ 20D7  8B 36 002C R		mov si,index1
+ 20DB  EB 59			jmp vertical_next_step4
+
+ 20DD				vertical_crush_them4:
+ 20DD				check_vertical_fourth4:
+ 20DD  83 06 002C R 0A		add index1,10
+ 20E2  8B 36 002C R		mov si,index1
+ 20E6  8A AC 064B R		mov ch,myarray[si]
+ 20EA  38 CD			cmp ch,cl
+ 20EC  74 0B			je crush_vertical_four4
+ 20EE  83 2E 002C R 0A		sub index1,10
+ 20F3  8B 36 002C R		mov si,index1
+ 20F7  EB 0E			jmp crush_vertical_three4
+
+ 20F9				crush_vertical_four4:
+ 20F9  C6 84 064B R 12		mov myarray[si],18
+ 20FE  83 2E 002C R 0A		sub index1,10
+ 2103  8B 36 002C R		mov si,index1
+
+ 2107				crush_vertical_three4:
+ 2107  C6 84 064B R 2F		mov myarray[si],'/'
+ 210C  83 2E 002C R 0A		sub index1,10
+ 2111  8B 36 002C R		mov si,index1
+ 2115  C6 84 064B R 2F		mov myarray[si],'/'
+ 211A  83 2E 002C R 0A		sub index1,10
+ 211F  8B 36 002C R		mov si,index1
+ 2123  C6 84 064B R 2F		mov myarray[si],'/'
+ 2128  83 06 002C R 14		add index1,20
+ 212D  8B 36 002C R		mov si,index1
+ 2131  83 06 0048 R 01		ADD SCORE,1
+
+ 2136				vertical_next_step4:
+ 2136  FE 06 0019 R		inc var11
+ 213A  80 3E 0019 R 02		cmp var11,2
+ 213F  74 03			je lgg4
+ 2141  E9 FF66			jmp lff4
+
+ 2144				lgg4:
+ 2144  C6 06 0019 R 00		mov var11,0
+ 2149  C7 06 002C R 0003	mov index1,03
+ 214F  FE 06 001A R		inc var12
+ 2153  A1 002C R		mov ax,index1
+ 2156  02 06 001A R		add al,var12
+ 215A  A3 002C R		mov index1,ax
+
+ 215D  80 3E 001A R 03		cmp var12,3
+ 2162  74 03			je lhh4
+ 2164  E9 FF3A			jmp vertical_outer_iteration4
+
+ 2167				lhh4:
+
+ 2167  B8 0000			mov ax,0
+ 216A  BB 0000			mov bx,0
+ 216D  B9 0000			mov cx,0
+ 2170  BA 0000			mov dx,0
+ 2173  C7 06 002C R 003F	mov index1,63
+ 2179  C6 06 001A R 00		mov var12,0
+ 217E  C6 06 0019 R 00		mov var11,0
+
+ 2183				vertical_outer_iteration5:
+ 2183  8B 36 002C R		mov si,index1
+ 2187  C6 06 0019 R 00		mov var11,0
+ 218C				lff5:
+ 218C  8A 84 064B R		mov al,myarray[si]
+ 2190  83 06 002C R 0A		add index1,10
+ 2195  8B 36 002C R		mov si,index1
+ 2199  8A 9C 064B R		mov bl,myarray[si]
+ 219D  38 D8			cmp al,bl
+ 219F  74 02			je vertical_check_third5
+ 21A1  EB 75			jmp vertical_next_step5
+
+ 21A3				vertical_check_third5:
+ 21A3  83 06 002C R 0A		add index1,10
+ 21A8  8B 36 002C R		mov si,index1
+ 21AC  8A 8C 064B R		mov cl,myarray[si]
+ 21B0  38 CB			cmp bl,cl
+ 21B2  74 0B			je vertical_crush_them5
+ 21B4  83 2E 002C R 0A		sub index1,10
+ 21B9  8B 36 002C R		mov si,index1
+ 21BD  EB 59			jmp vertical_next_step5
+
+ 21BF				vertical_crush_them5:
+ 21BF				check_vertical_fourth5:
+ 21BF  83 06 002C R 0A		add index1,10
+ 21C4  8B 36 002C R		mov si,index1
+ 21C8  8A AC 064B R		mov ch,myarray[si]
+ 21CC  38 CD			cmp ch,cl
+ 21CE  74 0B			je crush_vertical_four5
+ 21D0  83 2E 002C R 0A		sub index1,10
+ 21D5  8B 36 002C R		mov si,index1
+ 21D9  EB 0E			jmp crush_vertical_three5
+
+ 21DB				crush_vertical_four5:
+ 21DB  C6 84 064B R 12		mov myarray[si],18
+ 21E0  83 2E 002C R 0A		sub index1,10
+ 21E5  8B 36 002C R		mov si,index1
+
+ 21E9				crush_vertical_three5:
+ 21E9  C6 84 064B R 2F		mov myarray[si],'/'
+ 21EE  83 2E 002C R 0A		sub index1,10
+ 21F3  8B 36 002C R		mov si,index1
+ 21F7  C6 84 064B R 2F		mov myarray[si],'/'
+ 21FC  83 2E 002C R 0A		sub index1,10
+ 2201  8B 36 002C R		mov si,index1
+ 2205  C6 84 064B R 2F		mov myarray[si],'/'
+ 220A  83 06 002C R 14		add index1,20
+ 220F  8B 36 002C R		mov si,index1
+ 2213  83 06 0048 R 01		ADD SCORE,1
+
+ 2218				vertical_next_step5:
+ 2218  FE 06 0019 R		inc var11
+ 221C  80 3E 0019 R 02		cmp var11,2
+ 2221  74 03			je lgg5
+ 2223  E9 FF66			jmp lff5
+
+ 2226				lgg5:
+ 2226  C6 06 0019 R 00		mov var11,0
+ 222B  C7 06 002C R 003F	mov index1,63
+ 2231  FE 06 001A R		inc var12
+ 2235  A1 002C R		mov ax,index1
+ 2238  02 06 001A R		add al,var12
+ 223C  A3 002C R		mov index1,ax
+
+ 223F  80 3E 001A R 03		cmp var12,3
+ 2244  74 03			je lhh5
+ 2246  E9 FF3A			jmp vertical_outer_iteration5
+
+ 2249				lhh5:
+ 2249  C3			ret
+ 224A				vertical_crushing2 endp
+
+ 224A				welcome_messages3 proc
+
+ 224A  B4 02			mov ah,02h
+ 224C  B6 00			mov dh,0
+ 224E  B2 00			mov dl,0
+ 2250  CD 10			int 10h
+
+ 2252  B4 09			mov ah,09
+ 2254  BA 0066 R		mov dx,offset msg3
+ 2257  CD 21			int 21h
+
+ 2259  B4 09			mov ah,09
+ 225B  BA 0641 R		mov dx,offset username
+ 225E  CD 21			int 21h
+
+ 2260  B4 02			mov ah,02h
+ 2262  B6 02			mov dh,2
+ 2264  B2 00			mov dl,0
+ 2266  CD 10			int 10h
+
+ 2268  B4 09			mov ah,09
+ 226A  BA 006E R		mov dx,offset msg4
+ 226D  CD 21			int 21h
+
+ 226F  A1 004A R		MOV AX, MOVES
+ 2272  A3 004C R		MOV MOVESPRINT, AX
+ 2275  E8 F5FC			CALL PRI
+
+
+ 2278  B4 02			mov ah,02h
+ 227A  B6 00			mov dh,0
+ 227C  B2 1E			mov dl,30
+ 227E  CD 10			int 10h
+ 2280  BA 0184 R		mov dx,offset msg26
+ 2283  B4 09			mov ah,09
+ 2285  CD 21			int 21h
+
+
+ 2287  B4 02			mov ah,02h
+ 2289  B6 00			mov dh,0
+ 228B  B2 3C			mov dl,60
+ 228D  CD 10			int 10h
+ 228F  BA 005D R		mov dx,offset msg2
+ 2292  B4 09			mov ah,09
+ 2294  CD 21			int 21h
+
+ 2296  B8 0000			MOV AX, 0
+ 2299  A1 0048 R		mov ax, SCORE
+ 229C  A3 0050 R		mov SCOREPRINT,AX
+ 229F  E8 F60C			call PRI1
+
+ 22A2  B4 06			mov ah,6
+ 22A4  B0 00			mov al,0
+ 22A6  B5 01			mov ch,1
+ 22A8  B1 00			mov cl,0
+ 22AA  B6 01			mov dh,1
+ 22AC  B2 0F			mov dl,15
+ 22AE  B7 03			mov bh,3
+ 22B0  CD 10			int 10h
+
+ 22B2  B4 06			mov ah,6
+ 22B4  B0 00			mov al,0
+ 22B6  B5 01			mov ch,1
+ 22B8  B1 1B			mov cl,27
+ 22BA  B6 01			mov dh,1
+ 22BC  B2 26			mov dl,38
+ 22BE  B7 04			mov bh,4
+ 22C0  CD 10			int 10h
+
+ 22C2  B4 06			mov ah,6
+ 22C4  B0 00			mov al,0
+ 22C6  B5 01			mov ch,1
+ 22C8  B1 3A			mov cl,58
+ 22CA  B6 01			mov dh,1
+ 22CC  B2 49			mov dl,73
+ 22CE  B7 02			mov bh,2
+ 22D0  CD 10			int 10h
+
+ 22D2  B4 06			mov ah,6
+ 22D4  B0 00			mov al,0
+ 22D6  B5 03			mov ch,3
+ 22D8  B1 00			mov cl,0
+ 22DA  B6 03			mov dh,3
+ 22DC  B2 14			mov dl,20
+ 22DE  B7 09			mov bh,9
+ 22E0  CD 10			int 10h
+
+ 22E2  B8 0000			mov ax,0
+ 22E5  BB 0000			mov bx,0
+ 22E8  B9 0000			mov cx,0
+ 22EB  BA 0000			mov dx,0
+
+ 22EE  B4 02			mov ah,02h
+ 22F0  B6 1C			mov dh,28
+ 22F2  B2 1C			mov dl,28
+ 22F4  CD 10			int 10h
+ 22F6  C3			ret
+ 22F7				welcome_messages3 endp
+
+ 22F7				RANDOM3 PROC
+ 22F7  C7 06 0042 R 0000	MOV TEMP, 0
+ 22FD  BE 0000			MOV SI, 0
+ 2300				L1:
+ 2300  B4 2C				MOV AH, 2CH
+ 2302  CD 21				INT 21H
+ 2304  A1 0044 R			MOV AX, RAND
+ 2307  BB 0155				MOV BX, 341
+ 230A  F7 E3				MUL BX
+ 230C  BA 0000				MOV DX, 0
+ 230F  BB 0861				MOV BX, 2145
+ 2312  F7 F3				DIV BX
+ 2314  89 16 0044 R			MOV RAND, DX
+ 2318  B4 00				MOV AH, 0
+ 231A  F6 36 0047 R			DIV RANGEFORBLOCKERS
+ 231E  FE C4				INC AH
+ 2320  88 A4 064B R			MOV MYARRAY[SI], AH
+ 2324  80 FC 06				cmp ah,6
+ 2327  74 02				je createblocker
+ 2329  EB 05				jmp checkfornextblocker
+					
+ 232B					createblocker:
+ 232B  C6 84 064B R 28			mov myarray[si],40
+					
+ 2330					checkfornextblocker:
+ 2330  46				INC SI
+ 2331  FF 06 0042 R			INC TEMP
+ 2335  83 3E 0042 R 64			CMP TEMP, 100
+ 233A  74 02				JE L2
+ 233C  EB C2				JMP L1
+ 233E				L2:
+ 233E  C3			RET
+ 233F				RANDOM3 ENDP
+
+ 233F				DECORATION3 PROC
+ 233F  B4 06			mov ah,06
+ 2341  B0 00			mov al,0
+ 2343  B5 07			mov ch,7
+ 2345  B1 12			mov cl,18
+ 2347  B6 1A			mov dh,26
+ 2349  B2 3A			mov dl,58
+ 234B  B7 00			mov bh,0
+ 234D  CD 10			int 10h
+
+ 234F  B4 06			mov ah,06
+ 2351  B0 00			mov al,0
+ 2353  B5 1B			mov ch,27
+ 2355  B1 11			mov cl,17
+ 2357  B6 1B			mov dh,27
+ 2359  B2 3B			mov dl,59
+ 235B  B7 04			mov bh,4
+ 235D  CD 10			int 10h
+
+ 235F  B4 06			mov ah,06
+ 2361  B0 00			mov al,0
+ 2363  B5 06			mov ch,6
+ 2365  B1 11			mov cl,17
+ 2367  B6 06			mov dh,6
+ 2369  B2 3B			mov dl,59
+ 236B  B7 04			mov bh,4
+ 236D  CD 10			int 10h
+
+ 236F  B4 06			mov ah,06
+ 2371  B0 00			mov al,0
+ 2373  B5 06			mov ch,6
+ 2375  B1 10			mov cl,16
+ 2377  B6 1B			mov dh,27
+ 2379  B2 11			mov dl,17
+ 237B  B7 04			mov bh,4
+ 237D  CD 10			int 10h
+
+ 237F  B4 06			mov ah,06
+ 2381  B0 00			mov al,0
+ 2383  B5 06			mov ch,6
+ 2385  B1 3A			mov cl,58
+ 2387  B6 1B			mov dh,27
+ 2389  B2 3C			mov dl,60
+ 238B  B7 04			mov bh,4
+ 238D  CD 10			int 10h
+
+ 238F  B4 06			mov ah,06
+ 2391  B0 00			mov al,0
+ 2393  B5 05			mov ch,5
+ 2395  B1 2D			mov cl,45
+ 2397  B6 05			mov dh,5
+ 2399  B2 2D			mov dl,45
+ 239B  B7 05			mov bh,5
+ 239D  CD 10			int 10h
+
+ 239F  B4 06			mov ah,06
+ 23A1  B0 00			mov al,0
+ 23A3  B5 04			mov ch,4
+ 23A5  B1 2E			mov cl,46
+ 23A7  B6 04			mov dh,4
+ 23A9  B2 2E			mov dl,46
+ 23AB  B7 06			mov bh,6
+ 23AD  CD 10			int 10h
+
+ 23AF  B4 06			mov ah,06
+ 23B1  B0 00			mov al,0
+ 23B3  B5 03			mov ch,3
+ 23B5  B1 2F			mov cl,47
+ 23B7  B6 03			mov dh,3
+ 23B9  B2 2F			mov dl,47
+ 23BB  B7 07			mov bh,7
+ 23BD  CD 10			int 10h
+
+ 23BF  B4 06			mov ah,06
+ 23C1  B0 00			mov al,0
+ 23C3  B5 02			mov ch,2
+ 23C5  B1 30			mov cl,48
+ 23C7  B6 02			mov dh,2
+ 23C9  B2 30			mov dl,48
+ 23CB  B7 09			mov bh,9
+ 23CD  CD 10			int 10h
+
+ 23CF  B4 06			mov ah,06
+ 23D1  B0 00			mov al,0
+ 23D3  B5 01			mov ch,1
+ 23D5  B1 31			mov cl,49
+ 23D7  B6 01			mov dh,1
+ 23D9  B2 31			mov dl,49
+ 23DB  B7 0A			mov bh,10
+ 23DD  CD 10			int 10h
+
+ 23DF  B4 06			mov ah,06
+ 23E1  B0 00			mov al,0
+ 23E3  B5 05			mov ch,5
+ 23E5  B1 1C			mov cl,28
+ 23E7  B6 05			mov dh,5
+ 23E9  B2 1C			mov dl,28
+ 23EB  B7 05			mov bh,5
+ 23ED  CD 10			int 10h
+
+ 23EF  B4 06			mov ah,06
+ 23F1  B0 00			mov al,0
+ 23F3  B5 04			mov ch,4
+ 23F5  B1 1B			mov cl,27
+ 23F7  B6 04			mov dh,4
+ 23F9  B2 1B			mov dl,27
+ 23FB  B7 06			mov bh,6
+ 23FD  CD 10			int 10h
+
+ 23FF  B4 06			mov ah,06
+ 2401  B0 00			mov al,0
+ 2403  B5 03			mov ch,3
+ 2405  B1 1A			mov cl,26
+ 2407  B6 03			mov dh,3
+ 2409  B2 1A			mov dl,26
+ 240B  B7 07			mov bh,7
+ 240D  CD 10			int 10h
+
+ 240F  B4 06			mov ah,06
+ 2411  B0 00			mov al,0
+ 2413  B5 02			mov ch,2
+ 2415  B1 19			mov cl,25
+ 2417  B6 02			mov dh,2
+ 2419  B2 19			mov dl,25
+ 241B  B7 09			mov bh,9
+ 241D  CD 10			int 10h
+
+ 241F  B4 06			mov ah,06
+ 2421  B0 00			mov al,0
+ 2423  B5 01			mov ch,1
+ 2425  B1 18			mov cl,24
+ 2427  B6 01			mov dh,1
+ 2429  B2 18			mov dl,24
+ 242B  B7 0A			mov bh,10
+ 242D  CD 10			int 10h
+
+
+ 242F  C6 06 0026 R 01		mov var24,1
+ 2434  C6 06 0027 R 06		mov var25,6
+
+ 2439				stackloop:
+ 2439  B4 06			mov ah,06
+ 243B  B0 00			mov al,0
+ 243D  8A 2E 0027 R		mov ch,var25
+ 2441  B1 40			mov cl,64
+ 2443  8A 36 0027 R		mov dh,var25
+ 2447  B2 4B			mov dl,75
+ 2449  8A 3E 0026 R		mov bh,var24
+ 244D  CD 10			int 10h
+ 244F  FE 06 0026 R		inc var24
+ 2453  80 06 0027 R 03		add var25,3
+ 2458  80 3E 0026 R 09		cmp var24,9
+ 245D  74 02			je endthisfunc
+ 245F  EB D8			jmp stackloop
+
+ 2461				endthisfunc:
+
+ 2461  B4 06			mov ah,06
+ 2463  B0 00			mov al,0
+ 2465  B5 06			mov ch,6
+ 2467  B1 3E			mov cl,62
+ 2469  B6 1B			mov dh,27
+ 246B  B2 3F			mov dl,63
+ 246D  B7 0D			mov bh,13
+ 246F  CD 10			int 10h
+
+ 2471  B4 06			mov ah,06
+ 2473  B0 00			mov al,0
+ 2475  B5 06			mov ch,6
+ 2477  B1 4C			mov cl,76
+ 2479  B6 1B			mov dh,27
+ 247B  B2 4D			mov dl,77
+ 247D  B7 0D			mov bh,13
+ 247F  CD 10			int 10h
+
+ 2481  B4 06			mov ah,06
+ 2483  B0 00			mov al,0
+ 2485  B5 1C			mov ch,28
+ 2487  B1 00			mov cl,0
+ 2489  B6 1D			mov dh,29
+ 248B  B2 4F			mov dl,79
+ 248D  B7 0C			mov bh,12
+ 248F  CD 10			int 10h
+
+ 2491  B4 06			mov ah,06
+ 2493  B0 00			mov al,0
+ 2495  B5 06			mov ch,6
+ 2497  B1 01			mov cl,1
+ 2499  B6 1B			mov dh,27
+ 249B  B2 0E			mov dl,14
+ 249D  B7 08			mov bh,8
+ 249F  CD 10			int 10h
+
+ 24A1  E8 E7D2			CALL CLEAR
+
+ 24A4  B4 02			mov ah,02h
+ 24A6  B6 05			mov dh,5
+ 24A8  B2 42			mov dl,66
+ 24AA  CD 10			int 10h
+ 24AC  BA 018D R		mov dx,offset msg27
+ 24AF  B4 09			mov ah,09
+ 24B1  CD 21			int 21h
+
+ 24B3  E8 E7C0			CALL CLEAR
+
+ 24B6  B4 02			mov ah,02h
+ 24B8  B6 1C			mov dh,28
+ 24BA  B2 19			mov dl,25
+ 24BC  CD 10			int 10h
+ 24BE  BA 0196 R		mov dx,offset msg28
+ 24C1  B4 09			mov ah,09
+ 24C3  CD 21			int 21h
+
+ 24C5  E8 E7AE			CALL CLEAR
+
+ 24C8  B4 02			mov ah,02h
+ 24CA  B6 0E			mov dh,14
+ 24CC  B2 04			mov dl,4
+ 24CE  CD 10			int 10h
+ 24D0  BA 01B2 R		mov dx,offset msg29
+ 24D3  B4 09			mov ah,09
+ 24D5  CD 21			int 21h
+
+ 24D7  B4 02			mov ah,02h
+ 24D9  B6 0F			mov dh,15
+ 24DB  B2 05			mov dl,5
+ 24DD  CD 10			int 10h
+ 24DF  BA 01BC R		mov dx,offset msg30
+ 24E2  B4 09			mov ah,09
+ 24E4  CD 21			int 21h
+
+ 24E6  E8 E78D			CALL CLEAR 
+
+ 24E9  B4 02			mov ah,02h
+ 24EB  B6 10			mov dh,16
+ 24ED  B2 03			mov dl,3
+ 24EF  CD 10			int 10h
+ 24F1  BA 01C3 R		mov dx,offset msg31
+ 24F4  B4 09			mov ah,09
+ 24F6  CD 21			int 21h
+
+ 24F8  E8 E77B			CALL CLEAR 
+
+ 24FB  B4 02			mov ah,02h
+ 24FD  B6 08			mov dh,8
+ 24FF  B2 43			mov dl,67
+ 2501  CD 10			int 10h
+ 2503  BA 01CE R		mov dx,offset msg32
+ 2506  B4 09			mov ah,09
+ 2508  CD 21			int 21h
+
+ 250A  C6 06 0027 R 00		mov var25,0
+ 250F  C6 06 0026 R 0B		mov var24,11
+ 2514				bhailoop:
+ 2514  E8 E75F			CALL CLEAR 
+
+ 2517  B4 02			mov ah,02h
+ 2519  8A 36 0026 R		mov dh,var24
+ 251D  B2 43			mov dl,67
+ 251F  CD 10			int 10h
+ 2521  BA 01D5 R		mov dx,offset msg33
+ 2524  B4 09			mov ah,09
+ 2526  CD 21			int 21h
+ 2528  80 06 0026 R 03		add var24,3
+ 252D  FE 06 0027 R		inc var25
+ 2531  80 3E 0027 R 04		cmp var25,4
+ 2536  74 02			je endbhailoop
+ 2538  EB DA			jmp bhailoop
+
+ 253A				endbhailoop:
+ 253A  B2 44						MOV  DL, 68   ;COLUMN
+ 253C  B6 17						MOV  DH, 23   ;ROW
+ 253E  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 2540  B4 02						MOV  AH, 02H  ;SETCURSORPOSITION
+ 2542  CD 10						INT  10H	
+ 2544  B0 22						MOV  AL,34
+ 2546  04 30						ADD AL, 48
+ 2548  B3 02						MOV  BL, 2
+ 254A  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 254C  B4 0E						MOV  AH, 0EH  ;TELETYPE
+ 254E  CD 10						INT  10H
+							
+ 2550  B2 45						MOV  DL, 69   ;COLUMN
+ 2552  B6 17						MOV  DH, 23   ;ROW
+ 2554  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 2556  B4 02						MOV  AH, 02H  ;SETCURSORPOSITION
+ 2558  CD 10						INT  10H	
+ 255A  B0 15						MOV  AL,21
+ 255C  04 30						ADD AL, 48
+ 255E  B3 09						MOV  BL, 9
+ 2560  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 2562  B4 0E						MOV  AH, 0EH  ;TELETYPE
+ 2564  CD 10						INT  10H
+							
+ 2566  B2 46						MOV  DL, 70   ;COLUMN
+ 2568  B6 17						MOV  DH, 23   ;ROW
+ 256A  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 256C  B4 02						MOV  AH, 02H  ;SETCURSORPOSITION
+ 256E  CD 10						INT  10H	
+ 2570  B0 24						MOV  AL,36
+ 2572  04 30						ADD AL, 48
+ 2574  B3 0E						MOV  BL, 14
+ 2576  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 2578  B4 0E						MOV  AH, 0EH  ;TELETYPE
+ 257A  CD 10						INT  10H
+							
+ 257C  B2 45						MOV  DL, 69   ;COLUMN
+ 257E  B6 1A						MOV  DH, 26   ;ROW
+ 2580  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 2582  B4 02						MOV  AH, 02H  ;SETCURSORPOSITION
+ 2584  CD 10						INT  10H	
+ 2586  B0 28						MOV  AL,40
+ 2588  04 30						ADD AL, 48
+ 258A  B3 04						MOV  BL, 4
+ 258C  B7 00						MOV  BH, 0    ;DISPLAY PAGE
+ 258E  B4 0E						MOV  AH, 0EH  ;TELETYPE
+ 2590  CD 10						INT  10H
+ 2592  C3			RET
+ 2593				DECORATION3 ENDP
+
+				end
+Microsoft (R) Macro Assembler Version 6.11		    12/07/18 09:10:16
+game1.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+DGROUP . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	16 Bit	 083F	  Word	  Public  'DATA'	
+STACK  . . . . . . . . . . . . .	16 Bit	 0100	  Para	  Stack	  'STACK'	 
+_TEXT  . . . . . . . . . . . . .	16 Bit	 2593	  Word	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+CLEAR  . . . . . . . . . . . . .	P Near	 0C76	  _TEXT	Length= 0010 Public
+DECORATION2  . . . . . . . . . .	P Near	 19A8	  _TEXT	Length= 02F1 Public
+DECORATION3  . . . . . . . . . .	P Near	 233F	  _TEXT	Length= 0254 Public
+  stackloop  . . . . . . . . . .	L Near	 2439	  _TEXT	
+  endthisfunc  . . . . . . . . .	L Near	 2461	  _TEXT	
+  bhailoop . . . . . . . . . . .	L Near	 2514	  _TEXT	
+  endbhailoop  . . . . . . . . .	L Near	 253A	  _TEXT	
+DECORATION . . . . . . . . . . .	P Near	 1901	  _TEXT	Length= 007B Public
+DISPLAY_ARRAY  . . . . . . . . .	P Near	 06F1	  _TEXT	Length= 0055 Public
+  L0 . . . . . . . . . . . . . .	L Near	 0708	  _TEXT	
+  L1 . . . . . . . . . . . . . .	L Near	 070F	  _TEXT	
+DROP . . . . . . . . . . . . . .	P Near	 090A	  _TEXT	Length= 00BC Public
+  start_dropping . . . . . . . .	L Near	 090A	  _TEXT	
+  dropping_first . . . . . . . .	L Near	 0967	  _TEXT	
+  swap_them  . . . . . . . . . .	L Near	 097E	  _TEXT	
+  next_step  . . . . . . . . . .	L Near	 09A6	  _TEXT	
+  repeat_dropping  . . . . . . .	L Near	 09B7	  _TEXT	
+  end_dropping . . . . . . . . .	L Near	 09C5	  _TEXT	
+GRID . . . . . . . . . . . . . .	P Near	 0BD7	  _TEXT	Length= 009F Public
+  L2 . . . . . . . . . . . . . .	L Near	 0BEF	  _TEXT	
+  L1 . . . . . . . . . . . . . .	L Near	 0BEF	  _TEXT	
+  L4 . . . . . . . . . . . . . .	L Near	 0C3E	  _TEXT	
+  L3 . . . . . . . . . . . . . .	L Near	 0C3E	  _TEXT	
+MOUSE_CLICK  . . . . . . . . . .	P Near	 0B2A	  _TEXT	Length= 00A4 Public
+  CLICK1 . . . . . . . . . . . .	L Near	 0B2F	  _TEXT	
+  CLICK2 . . . . . . . . . . . .	L Near	 0B7E	  _TEXT	
+  E  . . . . . . . . . . . . . .	L Near	 0BCD	  _TEXT	
+POS  . . . . . . . . . . . . . .	P Near	 0BCE	  _TEXT	Length= 0009 Public
+PRI1 . . . . . . . . . . . . . .	P Near	 18AE	  _TEXT	Length= 003A Public
+  PRINT  . . . . . . . . . . . .	L Near	 18AE	  _TEXT	
+  PUSH_IN  . . . . . . . . . . .	L Near	 18C0	  _TEXT	
+  POP_UP . . . . . . . . . . . .	L Near	 18D2	  _TEXT	
+  EXT  . . . . . . . . . . . . .	L Near	 18E7	  _TEXT	
+PRI  . . . . . . . . . . . . . .	P Near	 1874	  _TEXT	Length= 003A Public
+  PRINT  . . . . . . . . . . . .	L Near	 1874	  _TEXT	
+  PUSH_IN  . . . . . . . . . . .	L Near	 1886	  _TEXT	
+  POP_UP . . . . . . . . . . . .	L Near	 1898	  _TEXT	
+  EXT  . . . . . . . . . . . . .	L Near	 18AD	  _TEXT	
+RANDOM3  . . . . . . . . . . . .	P Near	 22F7	  _TEXT	Length= 0048 Public
+  L1 . . . . . . . . . . . . . .	L Near	 2300	  _TEXT	
+  createblocker  . . . . . . . .	L Near	 232B	  _TEXT	
+  checkfornextblocker  . . . . .	L Near	 2330	  _TEXT	
+  L2 . . . . . . . . . . . . . .	L Near	 233E	  _TEXT	
+RANDOM . . . . . . . . . . . . .	P Near	 0746	  _TEXT	Length= 003C Public
+  L1 . . . . . . . . . . . . . .	L Near	 074F	  _TEXT	
+  L2 . . . . . . . . . . . . . .	L Near	 0781	  _TEXT	
+SHOW_SCREEN1 . . . . . . . . . .	P Near	 18E8	  _TEXT	Length= 0019 Public
+SHOW_SCREEN2 . . . . . . . . . .	P Near	 197C	  _TEXT	Length= 0013 Public
+SHOW_SCREEN3 . . . . . . . . . .	P Near	 198F	  _TEXT	Length= 0019 Public
+SWAP . . . . . . . . . . . . . .	P Near	 0A50	  _TEXT	Length= 00DA Public
+  S  . . . . . . . . . . . . . .	L Near	 0A97	  _TEXT	
+  bomb_crush_case1 . . . . . . .	L Near	 0AC0	  _TEXT	
+  bomb_crush_loop  . . . . . . .	L Near	 0ACC	  _TEXT	
+  crush_it . . . . . . . . . . .	L Near	 0AD4	  _TEXT	
+  go_next  . . . . . . . . . . .	L Near	 0AD9	  _TEXT	
+  bomb_crush_case2 . . . . . . .	L Near	 0AE7	  _TEXT	
+  bomb_crush_loop1 . . . . . . .	L Near	 0AF3	  _TEXT	
+  crush_it1  . . . . . . . . . .	L Near	 0AFB	  _TEXT	
+  go_next1 . . . . . . . . . . .	L Near	 0B00	  _TEXT	
+  crush_all  . . . . . . . . . .	L Near	 0B0E	  _TEXT	
+  crush_all_loop . . . . . . . .	L Near	 0B16	  _TEXT	
+  R  . . . . . . . . . . . . . .	L Near	 0B29	  _TEXT	
+display_start1 . . . . . . . . .	P Near	 0C86	  _TEXT	Length= 051E Public
+display_start2 . . . . . . . . .	P Near	 11A4	  _TEXT	Length= 051E Public
+filltoprow . . . . . . . . . . .	P Near	 09C6	  _TEXT	Length= 008A Public
+  filltoprow_first . . . . . . .	L Near	 0A14	  _TEXT	
+  create_new . . . . . . . . . .	L Near	 0A1D	  _TEXT	
+  gotonext . . . . . . . . . . .	L Near	 0A41	  _TEXT	
+  endfilltop . . . . . . . . . .	L Near	 0A4F	  _TEXT	
+game_rules . . . . . . . . . . .	P Near	 0430	  _TEXT	Length= 01D3 Public
+  lc . . . . . . . . . . . . . .	L Near	 0451	  _TEXT	
+  ld . . . . . . . . . . . . . .	L Near	 0482	  _TEXT	
+  lc1  . . . . . . . . . . . . .	L Near	 049B	  _TEXT	
+  lm . . . . . . . . . . . . . .	L Near	 04CC	  _TEXT	
+  linesloop  . . . . . . . . . .	L Near	 05BE	  _TEXT	
+  endlinesloop . . . . . . . . .	L Near	 05E6	  _TEXT	
+gameoverscreen . . . . . . . . .	P Near	 034C	  _TEXT	Length= 00E4 Public
+get_name_function  . . . . . . .	P Near	 16C2	  _TEXT	Length= 0187 Public
+  lc . . . . . . . . . . . . . .	L Near	 16CA	  _TEXT	
+  ld . . . . . . . . . . . . . .	L Near	 16FB	  _TEXT	
+  lg . . . . . . . . . . . . . .	L Near	 1714	  _TEXT	
+  lf . . . . . . . . . . . . . .	L Near	 1745	  _TEXT	
+  lh . . . . . . . . . . . . . .	L Near	 175E	  _TEXT	
+  li . . . . . . . . . . . . . .	L Near	 178F	  _TEXT	
+  lk . . . . . . . . . . . . . .	L Near	 17A8	  _TEXT	
+  lm . . . . . . . . . . . . . .	L Near	 17D9	  _TEXT	
+  lq . . . . . . . . . . . . . .	L Near	 1833	  _TEXT	
+  lr . . . . . . . . . . . . . .	L Near	 1843	  _TEXT	
+horizontal_crushing2 . . . . . .	P Near	 1D46	  _TEXT	Length= 0174 Public
+  loopfor  . . . . . . . . . . .	L Near	 1D51	  _TEXT	
+  checkforthird  . . . . . . . .	L Near	 1D67	  _TEXT	
+  crushthem  . . . . . . . . . .	L Near	 1D72	  _TEXT	
+  gonextline . . . . . . . . . .	L Near	 1D83	  _TEXT	
+  line4  . . . . . . . . . . . .	L Near	 1D95	  _TEXT	
+  endthis  . . . . . . . . . . .	L Near	 1DA8	  _TEXT	
+  horizontal_outer_iterationinline4and7  L Near	  1DB3	   _TEXT	
+  lccinline4and7 . . . . . . . .	L Near	 1DBC	  _TEXT	
+  checkforthirdinline4andline7 .	L Near	 1DCB	  _TEXT	
+  horizontal_crush_theminline4andline7 . L Near	  1DD7	   _TEXT	
+  check_horizontal_fourthinline4and7 .	L Near	 1DD7	  _TEXT	
+  crush_horizontal_fourinline4and7 .	L Near	 1DE3	  _TEXT	
+  crush_horizontal_threeinline4and7 	L Near	 1DE9	  _TEXT	
+  horizontal_next_go . . . . . .	L Near	 1E01	  _TEXT	
+  lddinline4and7 . . . . . . . .	L Near	 1E0E	  _TEXT	
+  hardcode . . . . . . . . . . .	L Near	 1E26	  _TEXT	
+  check42  . . . . . . . . . . .	L Near	 1E36	  _TEXT	
+  crush40till42  . . . . . . . .	L Near	 1E3E	  _TEXT	
+  goto46 . . . . . . . . . . . .	L Near	 1E4D	  _TEXT	
+  check48  . . . . . . . . . . .	L Near	 1E5A	  _TEXT	
+  crush46till48  . . . . . . . .	L Near	 1E62	  _TEXT	
+  goto50 . . . . . . . . . . . .	L Near	 1E71	  _TEXT	
+  check52  . . . . . . . . . . .	L Near	 1E7E	  _TEXT	
+  crush50till52  . . . . . . . .	L Near	 1E86	  _TEXT	
+  goto56 . . . . . . . . . . . .	L Near	 1E95	  _TEXT	
+  check58  . . . . . . . . . . .	L Near	 1EA2	  _TEXT	
+  crush56till58  . . . . . . . .	L Near	 1EAA	  _TEXT	
+  endthishorizontal2 . . . . . .	L Near	 1EB9	  _TEXT	
+horizontal_crushing  . . . . . .	P Near	 0782	  _TEXT	Length= 0098 Public
+  horizontal_outer_iteration . .	L Near	 0792	  _TEXT	
+  lcc  . . . . . . . . . . . . .	L Near	 079B	  _TEXT	
+  horizontal_check_third . . . .	L Near	 07AA	  _TEXT	
+  horizontal_crush_them  . . . .	L Near	 07BD	  _TEXT	
+  check_horizontal_fourth  . . .	L Near	 07BD	  _TEXT	
+  crush_horizontal_four  . . . .	L Near	 07CE	  _TEXT	
+  crush_horizontal_blocker . . .	L Near	 07D6	  _TEXT	
+  crush_horizontal_three . . . .	L Near	 07DC	  _TEXT	
+  horizontal_next_step . . . . .	L Near	 07F4	  _TEXT	
+  ldd  . . . . . . . . . . . . .	L Near	 0801	  _TEXT	
+  lee  . . . . . . . . . . . . .	L Near	 0819	  _TEXT	
+level1loading  . . . . . . . . .	P Near	 0214	  _TEXT	Length= 005C Public
+level2loading  . . . . . . . . .	P Near	 0270	  _TEXT	Length= 0080 Public
+level3loading  . . . . . . . . .	P Near	 02F0	  _TEXT	Length= 005C Public
+long_delay_function  . . . . . .	P Near	 0603	  _TEXT	Length= 001D Public
+  l8 . . . . . . . . . . . . . .	L Near	 0608	  _TEXT	
+  l9 . . . . . . . . . . . . . .	L Near	 061F	  _TEXT	
+main . . . . . . . . . . . . . .	P Near	 0000	  _TEXT	Length= 0214 Public
+  la . . . . . . . . . . . . . .	L Near	 0005	  _TEXT	
+  waitforrules . . . . . . . . .	L Near	 001F	  _TEXT	
+  lb . . . . . . . . . . . . . .	L Near	 003F	  _TEXT	
+  l3 . . . . . . . . . . . . . .	L Near	 0051	  _TEXT	
+  l4 . . . . . . . . . . . . . .	L Near	 007D	  _TEXT	
+  l1 . . . . . . . . . . . . . .	L Near	 0092	  _TEXT	
+  skip_crush . . . . . . . . . .	L Near	 00B2	  _TEXT	
+  MEXT . . . . . . . . . . . . .	L Near	 00C7	  _TEXT	
+  l5 . . . . . . . . . . . . . .	L Near	 00F1	  _TEXT	
+  l7 . . . . . . . . . . . . . .	L Near	 011D	  _TEXT	
+  l6 . . . . . . . . . . . . . .	L Near	 0132	  _TEXT	
+  skip_crush2  . . . . . . . . .	L Near	 0152	  _TEXT	
+  MEXT1  . . . . . . . . . . . .	L Near	 0167	  _TEXT	
+  l8 . . . . . . . . . . . . . .	L Near	 0191	  _TEXT	
+  l10  . . . . . . . . . . . . .	L Near	 01BD	  _TEXT	
+  l9 . . . . . . . . . . . . . .	L Near	 01D2	  _TEXT	
+  skip_crush3  . . . . . . . . .	L Near	 01F2	  _TEXT	
+  MEXT2  . . . . . . . . . . . .	L Near	 0207	  _TEXT	
+new_window . . . . . . . . . . .	P Near	 06EA	  _TEXT	Length= 0007 Public
+short_delay_function . . . . . .	P Near	 0620	  _TEXT	Length= 001D Public
+  l8 . . . . . . . . . . . . . .	L Near	 0625	  _TEXT	
+  l9 . . . . . . . . . . . . . .	L Near	 063C	  _TEXT	
+sound  . . . . . . . . . . . . .	P Near	 1849	  _TEXT	Length= 002B Public
+  NEXT_FREQUENCY . . . . . . . .	L Near	 1853	  _TEXT	
+  DELAY_LOOP . . . . . . . . . .	L Near	 1864	  _TEXT	
+vertical_crushing2 . . . . . . .	P Near	 1EBA	  _TEXT	Length= 0390 Public
+  vertical_outer_iteration2  . .	L Near	 1ED6	  _TEXT	
+  lff2 . . . . . . . . . . . . .	L Near	 1EDF	  _TEXT	
+  vertical_check_third2  . . . .	L Near	 1EF6	  _TEXT	
+  vertical_crush_them2 . . . . .	L Near	 1F19	  _TEXT	
+  check_vertical_fourth2 . . . .	L Near	 1F19	  _TEXT	
+  crush_vertical_four2 . . . . .	L Near	 1F35	  _TEXT	
+  crush_vertical_three2  . . . .	L Near	 1F43	  _TEXT	
+  vertical_next_step2  . . . . .	L Near	 1F72	  _TEXT	
+  lgg2 . . . . . . . . . . . . .	L Near	 1F80	  _TEXT	
+  lhh2 . . . . . . . . . . . . .	L Near	 1FA3	  _TEXT	
+  vertical_outer_iteration3  . .	L Near	 1FBF	  _TEXT	
+  lff3 . . . . . . . . . . . . .	L Near	 1FC8	  _TEXT	
+  vertical_check_third3  . . . .	L Near	 1FDF	  _TEXT	
+  vertical_crush_them3 . . . . .	L Near	 1FFB	  _TEXT	
+  check_vertical_fourth3 . . . .	L Near	 1FFB	  _TEXT	
+  crush_vertical_four3 . . . . .	L Near	 2017	  _TEXT	
+  crush_vertical_three3  . . . .	L Near	 2025	  _TEXT	
+  vertical_next_step3  . . . . .	L Near	 2054	  _TEXT	
+  lgg3 . . . . . . . . . . . . .	L Near	 2062	  _TEXT	
+  lhh3 . . . . . . . . . . . . .	L Near	 2085	  _TEXT	
+  vertical_outer_iteration4  . .	L Near	 20A1	  _TEXT	
+  lff4 . . . . . . . . . . . . .	L Near	 20AA	  _TEXT	
+  vertical_check_third4  . . . .	L Near	 20C1	  _TEXT	
+  vertical_crush_them4 . . . . .	L Near	 20DD	  _TEXT	
+  check_vertical_fourth4 . . . .	L Near	 20DD	  _TEXT	
+  crush_vertical_four4 . . . . .	L Near	 20F9	  _TEXT	
+  crush_vertical_three4  . . . .	L Near	 2107	  _TEXT	
+  vertical_next_step4  . . . . .	L Near	 2136	  _TEXT	
+  lgg4 . . . . . . . . . . . . .	L Near	 2144	  _TEXT	
+  lhh4 . . . . . . . . . . . . .	L Near	 2167	  _TEXT	
+  vertical_outer_iteration5  . .	L Near	 2183	  _TEXT	
+  lff5 . . . . . . . . . . . . .	L Near	 218C	  _TEXT	
+  vertical_check_third5  . . . .	L Near	 21A3	  _TEXT	
+  vertical_crush_them5 . . . . .	L Near	 21BF	  _TEXT	
+  check_vertical_fourth5 . . . .	L Near	 21BF	  _TEXT	
+  crush_vertical_four5 . . . . .	L Near	 21DB	  _TEXT	
+  crush_vertical_three5  . . . .	L Near	 21E9	  _TEXT	
+  vertical_next_step5  . . . . .	L Near	 2218	  _TEXT	
+  lgg5 . . . . . . . . . . . . .	L Near	 2226	  _TEXT	
+  lhh5 . . . . . . . . . . . . .	L Near	 2249	  _TEXT	
+vertical_crushing  . . . . . . .	P Near	 081A	  _TEXT	Length= 05D0 Public
+  vertical_outer_iteration . . .	L Near	 0826	  _TEXT	
+  lff  . . . . . . . . . . . . .	L Near	 082F	  _TEXT	
+  vertical_check_third . . . . .	L Near	 0847	  _TEXT	
+  vertical_crush_them  . . . . .	L Near	 086A	  _TEXT	
+  check_vertical_fourth  . . . .	L Near	 086A	  _TEXT	
+  crush_vertical_four  . . . . .	L Near	 088B	  _TEXT	
+  crush_vertical_blocker . . . .	L Near	 089B	  _TEXT	
+  crush_vertical_three . . . . .	L Near	 08A9	  _TEXT	
+  vertical_next_step . . . . . .	L Near	 08D8	  _TEXT	
+  lgg  . . . . . . . . . . . . .	L Near	 08E6	  _TEXT	
+  lhh  . . . . . . . . . . . . .	L Near	 0909	  _TEXT	
+welcome_messages2  . . . . . . .	P Near	 1C99	  _TEXT	Length= 00AD Public
+welcome_messages3  . . . . . . .	P Near	 224A	  _TEXT	Length= 00AD Public
+welcome_messages . . . . . . . .	P Near	 063D	  _TEXT	Length= 00AD Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 0000h	 
+@DataSize  . . . . . . . . . . .	Number	 0000h	 
+@Interface . . . . . . . . . . .	Number	 0000h	 
+@Model . . . . . . . . . . . . .	Number	 0002h	 
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 DGROUP
+@fardata?  . . . . . . . . . . .	Text   	 FAR_BSS
+@fardata . . . . . . . . . . . .	Text   	 FAR_DATA
+@stack . . . . . . . . . . . . .	Text   	 DGROUP
+DIGITCOUNT1  . . . . . . . . . .	Word	 0052	  _DATA	
+DIGITCOUNT . . . . . . . . . . .	Word	 004E	  _DATA	
+MOVESPRINT . . . . . . . . . . .	Word	 004C	  _DATA	
+MOVES  . . . . . . . . . . . . .	Word	 004A	  _DATA	
+RAND . . . . . . . . . . . . . .	Word	 0044	  _DATA	
+RANGEFORBLOCKERS . . . . . . . .	Byte	 0047	  _DATA	
+RANGE  . . . . . . . . . . . . .	Byte	 0046	  _DATA	
+SCOREPRINT . . . . . . . . . . .	Word	 0050	  _DATA	
+SCORE  . . . . . . . . . . . . .	Word	 0048	  _DATA	
+T1 . . . . . . . . . . . . . . .	Word	 003E	  _DATA	
+T2 . . . . . . . . . . . . . . .	Word	 0040	  _DATA	
+TEMP . . . . . . . . . . . . . .	Word	 0042	  _DATA	
+VAR1 . . . . . . . . . . . . . .	Byte	 000E	  _DATA	
+X1 . . . . . . . . . . . . . . .	Word	 0006	  _DATA	
+X2 . . . . . . . . . . . . . . .	Word	 000A	  _DATA	
+XO . . . . . . . . . . . . . . .	Byte	 0004	  _DATA	
+X  . . . . . . . . . . . . . . .	Word	 0000	  _DATA	
+Y1 . . . . . . . . . . . . . . .	Word	 0008	  _DATA	
+Y2 . . . . . . . . . . . . . . .	Word	 000C	  _DATA	
+YO . . . . . . . . . . . . . . .	Byte	 0005	  _DATA	
+Y  . . . . . . . . . . . . . . .	Word	 0002	  _DATA	
+color  . . . . . . . . . . . . .	Byte	 0033	  _DATA	
+count  . . . . . . . . . . . . .	Byte	 0029	  _DATA	
+index1 . . . . . . . . . . . . .	Word	 002C	  _DATA	
+index2 . . . . . . . . . . . . .	Word	 002E	  _DATA	
+index3 . . . . . . . . . . . . .	Word	 0030	  _DATA	
+index  . . . . . . . . . . . . .	Word	 002A	  _DATA	
+level  . . . . . . . . . . . . .	Byte	 0032	  _DATA	
+long_delay . . . . . . . . . . .	Byte	 003C	  _DATA	
+msg10  . . . . . . . . . . . . .	Byte	 0118	  _DATA	
+msg11  . . . . . . . . . . . . .	Byte	 011D	  _DATA	
+msg12  . . . . . . . . . . . . .	Byte	 0122	  _DATA	
+msg13  . . . . . . . . . . . . .	Byte	 0126	  _DATA	
+msg14  . . . . . . . . . . . . .	Byte	 012B	  _DATA	
+msg15  . . . . . . . . . . . . .	Byte	 012F	  _DATA	
+msg16  . . . . . . . . . . . . .	Byte	 0133	  _DATA	
+msg17  . . . . . . . . . . . . .	Byte	 013D	  _DATA	
+msg18  . . . . . . . . . . . . .	Byte	 0142	  _DATA	
+msg19  . . . . . . . . . . . . .	Byte	 014A	  _DATA	
+msg1 . . . . . . . . . . . . . .	Byte	 0054	  _DATA	
+msg20  . . . . . . . . . . . . .	Byte	 0154	  _DATA	
+msg21  . . . . . . . . . . . . .	Byte	 0159	  _DATA	
+msg22  . . . . . . . . . . . . .	Byte	 0162	  _DATA	
+msg23  . . . . . . . . . . . . .	Byte	 0167	  _DATA	
+msg24  . . . . . . . . . . . . .	Byte	 0174	  _DATA	
+msg25  . . . . . . . . . . . . .	Byte	 017B	  _DATA	
+msg26  . . . . . . . . . . . . .	Byte	 0184	  _DATA	
+msg27  . . . . . . . . . . . . .	Byte	 018D	  _DATA	
+msg28  . . . . . . . . . . . . .	Byte	 0196	  _DATA	
+msg29  . . . . . . . . . . . . .	Byte	 01B2	  _DATA	
+msg2 . . . . . . . . . . . . . .	Byte	 005D	  _DATA	
+msg30  . . . . . . . . . . . . .	Byte	 01BC	  _DATA	
+msg31  . . . . . . . . . . . . .	Byte	 01C3	  _DATA	
+msg32  . . . . . . . . . . . . .	Byte	 01CE	  _DATA	
+msg33  . . . . . . . . . . . . .	Byte	 01D5	  _DATA	
+msg34  . . . . . . . . . . . . .	Byte	 01DC	  _DATA	
+msg35  . . . . . . . . . . . . .	Byte	 01EA	  _DATA	
+msg36  . . . . . . . . . . . . .	Byte	 0208	  _DATA	
+msg37  . . . . . . . . . . . . .	Byte	 0254	  _DATA	
+msg38  . . . . . . . . . . . . .	Byte	 0288	  _DATA	
+msg39  . . . . . . . . . . . . .	Byte	 02C5	  _DATA	
+msg3 . . . . . . . . . . . . . .	Byte	 0066	  _DATA	
+msg40  . . . . . . . . . . . . .	Byte	 0315	  _DATA	
+msg41  . . . . . . . . . . . . .	Byte	 0345	  _DATA	
+msg42  . . . . . . . . . . . . .	Byte	 038B	  _DATA	
+msg43  . . . . . . . . . . . . .	Byte	 03CD	  _DATA	
+msg44  . . . . . . . . . . . . .	Byte	 03EB	  _DATA	
+msg45  . . . . . . . . . . . . .	Byte	 0416	  _DATA	
+msg46  . . . . . . . . . . . . .	Byte	 042B	  _DATA	
+msg47  . . . . . . . . . . . . .	Byte	 0452	  _DATA	
+msg48  . . . . . . . . . . . . .	Byte	 0481	  _DATA	
+msg49  . . . . . . . . . . . . .	Byte	 04A0	  _DATA	
+msg4 . . . . . . . . . . . . . .	Byte	 006E	  _DATA	
+msg50  . . . . . . . . . . . . .	Byte	 04B3	  _DATA	
+msg51  . . . . . . . . . . . . .	Byte	 04C7	  _DATA	
+msg52  . . . . . . . . . . . . .	Byte	 04D6	  _DATA	
+msg53  . . . . . . . . . . . . .	Byte	 04E5	  _DATA	
+msg54  . . . . . . . . . . . . .	Byte	 04F0	  _DATA	
+msg55  . . . . . . . . . . . . .	Byte	 0503	  _DATA	
+msg56  . . . . . . . . . . . . .	Byte	 0518	  _DATA	
+msg57  . . . . . . . . . . . . .	Byte	 0542	  _DATA	
+msg58  . . . . . . . . . . . . .	Byte	 0555	  _DATA	
+msg59  . . . . . . . . . . . . .	Byte	 0571	  _DATA	
+msg5 . . . . . . . . . . . . . .	Byte	 0081	  _DATA	
+msg60  . . . . . . . . . . . . .	Byte	 0589	  _DATA	
+msg61  . . . . . . . . . . . . .	Byte	 05AA	  _DATA	
+msg62  . . . . . . . . . . . . .	Byte	 05CE	  _DATA	
+msg63  . . . . . . . . . . . . .	Byte	 05E6	  _DATA	
+msg64  . . . . . . . . . . . . .	Byte	 05FC	  _DATA	
+msg65  . . . . . . . . . . . . .	Byte	 061D	  _DATA	
+msg66  . . . . . . . . . . . . .	Byte	 062F	  _DATA	
+msg6 . . . . . . . . . . . . . .	Byte	 0099	  _DATA	
+msg7 . . . . . . . . . . . . . .	Byte	 00B3	  _DATA	
+msg8 . . . . . . . . . . . . . .	Byte	 00E2	  _DATA	
+msg9 . . . . . . . . . . . . . .	Byte	 010F	  _DATA	
+myarray  . . . . . . . . . . . .	Byte	 064B	  _DATA	
+num1 . . . . . . . . . . . . . .	Word	 0036	  _DATA	
+num  . . . . . . . . . . . . . .	Word	 0034	  _DATA	
+short_delay  . . . . . . . . . .	Byte	 003D	  _DATA	
+temp1  . . . . . . . . . . . . .	Word	 0038	  _DATA	
+temp2  . . . . . . . . . . . . .	Word	 003A	  _DATA	
+username . . . . . . . . . . . .	Byte	 0641	  _DATA	
+var10  . . . . . . . . . . . . .	Byte	 0018	  _DATA	
+var11  . . . . . . . . . . . . .	Byte	 0019	  _DATA	
+var12  . . . . . . . . . . . . .	Byte	 001A	  _DATA	
+var13  . . . . . . . . . . . . .	Byte	 001B	  _DATA	
+var14  . . . . . . . . . . . . .	Byte	 001C	  _DATA	
+var15  . . . . . . . . . . . . .	Byte	 001D	  _DATA	
+var16  . . . . . . . . . . . . .	Byte	 001E	  _DATA	
+var17  . . . . . . . . . . . . .	Byte	 001F	  _DATA	
+var18  . . . . . . . . . . . . .	Byte	 0020	  _DATA	
+var19  . . . . . . . . . . . . .	Byte	 0021	  _DATA	
+var20  . . . . . . . . . . . . .	Byte	 0022	  _DATA	
+var21  . . . . . . . . . . . . .	Byte	 0023	  _DATA	
+var22  . . . . . . . . . . . . .	Byte	 0024	  _DATA	
+var23  . . . . . . . . . . . . .	Byte	 0025	  _DATA	
+var24  . . . . . . . . . . . . .	Byte	 0026	  _DATA	
+var25  . . . . . . . . . . . . .	Byte	 0027	  _DATA	
+var26  . . . . . . . . . . . . .	Byte	 0028	  _DATA	
+var2 . . . . . . . . . . . . . .	Byte	 0010	  _DATA	
+var3 . . . . . . . . . . . . . .	Byte	 0011	  _DATA	
+var4 . . . . . . . . . . . . . .	Byte	 0012	  _DATA	
+var5 . . . . . . . . . . . . . .	Byte	 0013	  _DATA	
+var6 . . . . . . . . . . . . . .	Byte	 0014	  _DATA	
+var7 . . . . . . . . . . . . . .	Byte	 0015	  _DATA	
+var8 . . . . . . . . . . . . . .	Byte	 0016	  _DATA	
+var9 . . . . . . . . . . . . . .	Byte	 0017	  _DATA	
+var  . . . . . . . . . . . . . .	Byte	 000F	  _DATA	
+
+	   0 Warnings
+	   0 Errors
